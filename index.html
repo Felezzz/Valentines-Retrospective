@@ -151,8 +151,9 @@
   #fullscreen-overlay .close-fs { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 40px; height: 40px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
   /* UPLOAD PROGRESS */
-  .upload-progress { background: var(--surface2); border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; font-size: 13px; color: var(--text2); display: none; }
+  .upload-progress { background: var(--surface2); border-radius: 8px; padding: 12px; margin-top: 16px; display: none; }
   .upload-progress.visible { display: block; }
+  .upload-progress-text { font-size: 12px; color: var(--text2); }
   .upload-progress-bar { height: 3px; background: var(--surface3); border-radius: 2px; margin-top: 8px; overflow: hidden; }
   .upload-progress-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.3s; }
 </style>
@@ -388,28 +389,12 @@ async function sb(path, opts = {}) {
     throw new Error(err);
   }
   const text = await res.text();
-  return text ? JSON.parse(text) : null;
-}
-
-async function sbStorage(action, path, body, contentType) {
-  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${action}/${path}`, {
-    method: body ? 'POST' : 'GET',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      ...(contentType ? { 'Content-Type': contentType } : {})
-    },
-    body: body || undefined
-  });
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(t);
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    return null;
   }
-  return res.json().catch(() => ({}));
-}
-
-function sbPublicUrl(filename) {
-  return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filename}`;
 }
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
@@ -425,6 +410,8 @@ let progressSec = 0;
 let playOrder = [];
 let shuffledOrder = [];
 let isAdmin = false;
+let bgMusic = null; // Placeholder for audio functionality
+const audioPlayer = new Audio();
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
@@ -475,30 +462,18 @@ function toast(msg, duration = 2500) {
 }
 
 function switchScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('hidden', s.id !== id));
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
 }
 
-// ─── INVITE LOGIC ─────────────────────────────────────────────────────────────
-document.getElementById('code-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') tryEnter();
-  document.getElementById('error-msg').textContent = '';
-  document.getElementById('code-input').classList.remove('error');
-});
-
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
 async function tryEnter() {
   const raw = document.getElementById('code-input').value.trim().toUpperCase();
-  if (!raw) { showError('Digite um código.'); return; }
-
+  if (!raw) return;
   const btn = document.getElementById('enter-btn');
   btn.disabled = true;
   btn.textContent = 'Verificando...';
-
   try {
-    if (raw === settings.admin_password?.toUpperCase()) {
-      await enterAdmin();
-      return;
-    }
-
     const rows = await sb(`invites?code=eq.${encodeURIComponent(raw)}&select=id,code,used`);
     if (rows && rows.length > 0) {
       const inv = rows[0];
@@ -587,7 +562,6 @@ async function addInvite() {
     await sb('invites', {
       method: 'POST',
       body: { code, name: name || 'Convidado', used: false },
-      prefer: 'return=representation',
       headers: { 'Prefer': 'return=representation' }
     });
     await loadInvites();
@@ -646,38 +620,39 @@ async function handleFiles(files) {
       const ext = file.name.split('.').pop();
       const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
       
-      // 1. Fazer o upload para o Storage
+      // 1. Upload to Storage
       const uploadResponse = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filename}`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_KEY,
           'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': file.type
+          'Content-Type': file.type,
+          'x-upsert': 'true'
         },
         body: file
       });
 
       if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        throw new Error(`Erro no Storage: ${errorText}`);
+        const errorData = await uploadResponse.json().catch(() => ({ message: 'Erro desconhecido' }));
+        throw new Error(errorData.message || `Status: ${uploadResponse.status}`);
       }
 
-      // 2. Gerar a URL pública (ajustada para garantir o formato correto)
+      // 2. Public URL
       const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filename}`;
       const name = file.name.replace(/\.[^.]+$/, '');
       const position = photos.length + i;
 
-      // 3. Salvar no banco de dados
+      // 3. Save to DB
       await sb('photos', {
         method: 'POST',
         body: { name, caption: '', src: publicUrl, position, liked: false },
         headers: { 'Prefer': 'return=minimal' }
       });
 
-      console.log(`Sucesso: ${filename} enviado e registrado.`);
+      console.log(`Sucesso: ${filename} enviado.`);
     } catch (e) {
-      console.error('Falha detalhada no upload:', e);
-      toast(`Erro: ${e.message}`);
+      console.error('Falha no upload:', e);
+      toast(`Erro no arquivo ${file.name}: ${e.message}`);
     }
   }
 
@@ -687,7 +662,7 @@ async function handleFiles(files) {
 
   await loadPhotos();
   renderPhotoGrid();
-  toast(`${arr.length} foto${arr.length > 1 ? 's' : ''} adicionada${arr.length > 1 ? 's' : ''}!`);
+  toast(`${arr.length} foto(s) processada(s).`);
 }
 
 // drag & drop
@@ -821,9 +796,6 @@ async function goPlayer() {
   try {
     await loadSettings();
     await loadPhotos();
-    if (photos.length === 0) {
-      toast('Aviso: Nenhuma foto encontrada no banco de dados.');
-    }
     switchScreen('player-screen');
     initPlayer();
   } catch (e) {
@@ -936,10 +908,8 @@ function togglePlay() {
     : '<path d="M8 5v14l11-7z"/>';
   if (isPlaying) {
     startTimer();
-    if (bgMusic) audioPlayer.play().catch(e => console.log('Autoplay bloqueado'));
   } else {
     stopTimer();
-    audioPlayer.pause();
   }
 }
 
