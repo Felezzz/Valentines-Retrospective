@@ -210,12 +210,13 @@
         </div>
         <input type="file" id="file-input" accept="image/*" multiple onchange="handleFiles(this.files)">
 
-        <div class="upload-progress" id="upload-progress">
-          <span id="upload-progress-text">Enviando...</span>
-          <div class="upload-progress-bar"><div class="upload-progress-fill" id="upload-progress-fill" style="width:0%"></div></div>
-        </div>
-
         <div class="photo-grid" id="photo-grid"></div>
+        <div id="upload-progress" class="upload-progress">
+          <div id="upload-progress-text">Enviando...</div>
+          <div class="upload-progress-bar">
+            <div id="upload-progress-fill" class="upload-progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
         <p style="font-size:12px;color:var(--text3);margin-top:12px;" id="photo-count-msg"></p>
       </div>
     </div>
@@ -450,8 +451,14 @@ async function loadSettings() {
 }
 
 async function loadPhotos() {
-  const rows = await sb('photos?select=*&order=position.asc,created_at.asc');
-  photos = rows || [];
+  try {
+    const rows = await sb('photos?select=*&order=position.asc,created_at.asc');
+    photos = rows || [];
+    console.log('Photos loaded:', photos);
+  } catch (e) {
+    console.error('Error loading photos:', e);
+    photos = [];
+  }
 }
 
 async function loadInvites() {
@@ -640,7 +647,7 @@ async function handleFiles(files) {
       const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
       const fullPath = `${BUCKET}/${filename}`;
 
-      await fetch(`${SUPABASE_URL}/storage/v1/object/${fullPath}`, {
+      await fetch(`${SUPABASE_URL}/storage/v1/object/${fullPath}`, { // Endpoint padrão para upload
         method: 'POST',
         headers: {
           'apikey': SUPABASE_KEY,
@@ -806,9 +813,13 @@ async function goPlayer() {
   try {
     await loadSettings();
     await loadPhotos();
+    if (photos.length === 0) {
+      toast('Aviso: Nenhuma foto encontrada no banco de dados.');
+    }
     switchScreen('player-screen');
     initPlayer();
   } catch (e) {
+    console.error('Erro ao entrar no player:', e);
     toast('Erro ao carregar retrospectiva.');
     switchScreen('invite-screen');
   }
