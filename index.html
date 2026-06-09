@@ -934,7 +934,13 @@ function togglePlay() {
   document.getElementById('play-icon').innerHTML = isPlaying
     ? '<path d="M6 19h4V5H6zm8-14v14h4V5z"/>'
     : '<path d="M8 5v14l11-7z"/>';
-  isPlaying ? startTimer() : stopTimer();
+  if (isPlaying) {
+    startTimer();
+    if (bgMusic) audioPlayer.play().catch(e => console.log('Autoplay bloqueado'));
+  } else {
+    stopTimer();
+    audioPlayer.pause();
+  }
 }
 
 function startTimer() {
