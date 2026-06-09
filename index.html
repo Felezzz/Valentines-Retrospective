@@ -370,7 +370,7 @@
 // ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://eromoiokvtnienjojson.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_dNpa0UMEo9mBInjsCp0YJg_sjd0zyXA';
-const BUCKET = 'photos';
+const BUCKET = 'Photos';
 
 async function sb(path, opts = {}) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -399,7 +399,7 @@ async function sb(path, opts = {}) {
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let settings = { title: 'Nossa Retrospectiva', author: 'Uma coleção especial', duration: 6, admin_password: 'admin123' };
-let photos = [];
+let Photos = [];
 let invites = [];
 let currentIndex = 0;
 let isPlaying = false;
@@ -439,12 +439,12 @@ async function loadSettings() {
 
 async function loadPhotos() {
   try {
-    const rows = await sb('photos?select=*&order=position.asc,created_at.asc');
-    photos = rows || [];
-    console.log('Photos loaded:', photos);
+    const rows = await sb('Photos?select=*&order=position.asc,created_at.asc');
+    Photos = rows || [];
+    console.log('Photos loaded:', Photos);
   } catch (e) {
-    console.error('Error loading photos:', e);
-    photos = [];
+    console.error('Error loading Photos:', e);
+    Photos = [];
   }
 }
 
@@ -601,7 +601,7 @@ function copyInviteLink() {
   navigator.clipboard.writeText(url).then(() => toast('Link copiado!')).catch(() => toast('Copie manualmente: ' + url));
 }
 
-// ─── ADMIN: PHOTOS ────────────────────────────────────────────────────────────
+// ─── ADMIN: Photos ────────────────────────────────────────────────────────────
 async function handleFiles(files) {
   const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
   if (!arr.length) return;
@@ -640,10 +640,10 @@ async function handleFiles(files) {
       // 2. Public URL
       const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filename}`;
       const name = file.name.replace(/\.[^.]+$/, '');
-      const position = photos.length + i;
+      const position = Photos.length + i;
 
       // 3. Save to DB
-      await sb('photos', {
+      await sb('Photos', {
         method: 'POST',
         body: { name, caption: '', src: publicUrl, position, liked: false },
         headers: { 'Prefer': 'return=minimal' }
@@ -678,13 +678,13 @@ uploadZone.addEventListener('drop', e => {
 function renderPhotoGrid() {
   const grid = document.getElementById('photo-grid');
   const msg = document.getElementById('photo-count-msg');
-  if (!photos.length) {
+  if (!Photos.length) {
     grid.innerHTML = '';
     msg.textContent = 'Nenhuma foto adicionada ainda.';
     return;
   }
-  msg.textContent = `${photos.length} foto${photos.length !== 1 ? 's' : ''} na retrospectiva`;
-  grid.innerHTML = photos.map((p, i) => `
+  msg.textContent = `${Photos.length} foto${Photos.length !== 1 ? 's' : ''} na retrospectiva`;
+  grid.innerHTML = Photos.map((p, i) => `
     <div class="photo-thumb-wrap">
       <img src="${p.src}" alt="${p.name}" loading="lazy">
       <div class="photo-thumb-overlay">
@@ -700,21 +700,21 @@ function renderPhotoGrid() {
 
 async function updateCaption(id, caption) {
   try {
-    await sb(`photos?id=eq.${id}`, { method: 'PATCH', body: { caption }, headers: { 'Prefer': 'return=minimal' } });
-    const p = photos.find(p => p.id === id);
+    await sb(`Photos?id=eq.${id}`, { method: 'PATCH', body: { caption }, headers: { 'Prefer': 'return=minimal' } });
+    const p = Photos.find(p => p.id === id);
     if (p) p.caption = caption;
   } catch (e) { console.error(e); }
 }
 
 async function movePhoto(id, idx, dir) {
   const j = idx + dir;
-  if (j < 0 || j >= photos.length) return;
-  const other = photos[j];
-  const current = photos[idx];
+  if (j < 0 || j >= Photos.length) return;
+  const other = Photos[j];
+  const current = Photos[idx];
   try {
-    await sb(`photos?id=eq.${id}`, { method: 'PATCH', body: { position: j }, headers: { 'Prefer': 'return=minimal' } });
-    await sb(`photos?id=eq.${other.id}`, { method: 'PATCH', body: { position: idx }, headers: { 'Prefer': 'return=minimal' } });
-    [photos[idx], photos[j]] = [photos[j], photos[idx]];
+    await sb(`Photos?id=eq.${id}`, { method: 'PATCH', body: { position: j }, headers: { 'Prefer': 'return=minimal' } });
+    await sb(`Photos?id=eq.${other.id}`, { method: 'PATCH', body: { position: idx }, headers: { 'Prefer': 'return=minimal' } });
+    [Photos[idx], Photos[j]] = [Photos[j], Photos[idx]];
     renderPhotoGrid();
   } catch (e) { toast('Erro ao reordenar.'); }
 }
@@ -722,7 +722,7 @@ async function movePhoto(id, idx, dir) {
 async function removePhoto(id, src) {
   if (!confirm('Remover esta foto?')) return;
   try {
-    await sb(`photos?id=eq.${id}`, { method: 'DELETE' });
+    await sb(`Photos?id=eq.${id}`, { method: 'DELETE' });
     const filename = src.split('/').pop();
     await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filename}`, {
       method: 'DELETE',
@@ -809,7 +809,7 @@ function initPlayer() {
   document.getElementById('player-brand-title').textContent = settings.title || 'Retrô';
   document.getElementById('speed-btn').textContent = settings.duration + 's';
 
-  if (!photos.length) {
+  if (!Photos.length) {
     document.getElementById('player-empty').style.display = 'flex';
     document.getElementById('player-content').style.display = 'none';
     return;
@@ -817,7 +817,7 @@ function initPlayer() {
   document.getElementById('player-empty').style.display = 'none';
   document.getElementById('player-content').style.display = 'flex';
 
-  playOrder = photos.map((_, i) => i);
+  playOrder = Photos.map((_, i) => i);
   buildShuffledOrder();
   currentIndex = 0;
   updateThumbRow();
@@ -831,10 +831,10 @@ function buildShuffledOrder() {
 function getOrder() { return isShuffle ? shuffledOrder : playOrder; }
 
 function showPhoto(idx) {
-  if (!photos.length) return;
+  if (!Photos.length) return;
   const order = getOrder();
   const realIdx = order[idx % order.length];
-  const photo = photos[realIdx];
+  const photo = Photos[realIdx];
 
   const art = document.getElementById('album-art');
   art.classList.add('fade');
@@ -848,7 +848,7 @@ function showPhoto(idx) {
   document.getElementById('player-bg').style.backgroundImage = `url('${photo.src}')`;
   document.getElementById('track-title').textContent = photo.name || `Foto ${realIdx + 1}`;
   document.getElementById('track-caption').textContent = photo.caption || settings.author || '';
-  document.getElementById('photo-counter').textContent = `${idx + 1} de ${photos.length}`;
+  document.getElementById('photo-counter').textContent = `${idx + 1} de ${Photos.length}`;
 
   const heart = document.getElementById('heart-btn');
   heart.textContent = photo.liked ? '♥' : '♡';
@@ -862,7 +862,7 @@ function showPhoto(idx) {
 }
 
 function updateDots(activeIdx) {
-  const max = Math.min(photos.length, 20);
+  const max = Math.min(Photos.length, 20);
   document.getElementById('dots-wrap').innerHTML = Array.from({ length: max }, (_, i) => `
     <div class="dot ${i === activeIdx % max ? 'active' : ''}" onclick="jumpTo(${i})"></div>
   `).join('');
@@ -876,13 +876,13 @@ function jumpTo(i) {
 
 function updateThumbRow() {
   const row = document.getElementById('thumb-row');
-  if (!photos.length) { row.innerHTML = ''; return; }
-  row.innerHTML = photos.map((p, i) => `
+  if (!Photos.length) { row.innerHTML = ''; return; }
+  row.innerHTML = Photos.map((p, i) => `
     <div class="thumb-item" id="thumb-${i}" onclick="jumpToReal(${i})">
       <img src="${p.src}" alt="${p.name}" loading="lazy">
     </div>
   `).join('');
-  updateThumbActive(getOrder()[currentIndex % photos.length]);
+  updateThumbActive(getOrder()[currentIndex % Photos.length]);
 }
 
 function updateThumbActive(realIdx) {
@@ -937,16 +937,16 @@ function updateTimerDisplay() { document.getElementById('time-total').textConten
 function formatTime(sec) { const s = Math.floor(sec); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
 
 function nextPhoto() {
-  currentIndex = (currentIndex + 1) % photos.length;
+  currentIndex = (currentIndex + 1) % Photos.length;
   showPhoto(currentIndex);
-  updateThumbActive(getOrder()[currentIndex % photos.length]);
+  updateThumbActive(getOrder()[currentIndex % Photos.length]);
   if (isPlaying) { stopTimer(); startTimer(); }
 }
 
 function prevPhoto() {
-  currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+  currentIndex = (currentIndex - 1 + Photos.length) % Photos.length;
   showPhoto(currentIndex);
-  updateThumbActive(getOrder()[currentIndex % photos.length]);
+  updateThumbActive(getOrder()[currentIndex % Photos.length]);
   if (isPlaying) { stopTimer(); startTimer(); }
 }
 
@@ -962,17 +962,17 @@ function toggleRepeat() {
 }
 
 async function toggleLike() {
-  if (!photos.length) return;
+  if (!Photos.length) return;
   const order = getOrder();
   const realIdx = order[currentIndex % order.length];
-  photos[realIdx].liked = !photos[realIdx].liked;
+  Photos[realIdx].liked = !Photos[realIdx].liked;
   const heart = document.getElementById('heart-btn');
-  heart.textContent = photos[realIdx].liked ? '♥' : '♡';
-  heart.classList.toggle('liked', photos[realIdx].liked);
+  heart.textContent = Photos[realIdx].liked ? '♥' : '♡';
+  heart.classList.toggle('liked', Photos[realIdx].liked);
   try {
-    await sb(`photos?id=eq.${photos[realIdx].id}`, {
+    await sb(`Photos?id=eq.${Photos[realIdx].id}`, {
       method: 'PATCH',
-      body: { liked: photos[realIdx].liked },
+      body: { liked: Photos[realIdx].liked },
       headers: { 'Prefer': 'return=minimal' }
     });
   } catch (e) { console.error(e); }
@@ -996,9 +996,9 @@ function cycleSpeed() {
 
 // ─── FULLSCREEN ────────────────────────────────────────────────────────────────
 function openFullscreen() {
-  if (!photos.length) return;
-  const realIdx = getOrder()[currentIndex % photos.length];
-  document.getElementById('fullscreen-img').src = photos[realIdx].src;
+  if (!Photos.length) return;
+  const realIdx = getOrder()[currentIndex % Photos.length];
+  document.getElementById('fullscreen-img').src = Photos[realIdx].src;
   document.getElementById('fullscreen-overlay').classList.add('visible');
 }
 function closeFullscreen() { document.getElementById('fullscreen-overlay').classList.remove('visible'); }
