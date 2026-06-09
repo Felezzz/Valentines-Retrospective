@@ -280,6 +280,7 @@
   <div class="player-bg" id="player-bg"></div>
   <div class="player-layout">
     <div class="player-topbar">
+      <button class="player-menu-btn" onclick="exitPlayer()">← Voltar</button>
       <div class="player-brand" id="player-brand-title">Retrô</div>
       <div style="display:flex;gap:8px;">
         <button class="speed-btn" id="speed-btn" onclick="cycleSpeed()">6s</button>
@@ -422,6 +423,7 @@ let progressInterval = null;
 let progressSec = 0;
 let playOrder = [];
 let shuffledOrder = [];
+let isAdmin = false;
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
@@ -525,6 +527,7 @@ function promptAdmin() {
 }
 
 async function enterAdmin() {
+  isAdmin = true;
   setLoading('Carregando painel...');
   switchScreen('loading-screen');
   try {
@@ -541,6 +544,7 @@ async function enterAdmin() {
 }
 
 function logout() {
+  isAdmin = false;
   document.getElementById('code-input').value = '';
   isPlaying = false;
   stopTimer();
@@ -786,6 +790,16 @@ async function changeAdminPwd() {
 }
 
 // ─── PLAYER ───────────────────────────────────────────────────────────────────
+function exitPlayer() {
+  isPlaying = false;
+  stopTimer();
+  if (isAdmin) {
+    switchScreen('admin-screen');
+  } else {
+    logout();
+  }
+}
+
 async function goPlayer() {
   setLoading('Carregando retrospectiva...');
   switchScreen('loading-screen');
