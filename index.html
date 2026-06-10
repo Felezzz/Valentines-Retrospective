@@ -190,6 +190,7 @@
     <div class="admin-section">
       <div class="admin-section-title">📸 Fotos da Retrospectiva</div>
       <div class="admin-card">
+        <p style="font-size:12px;color:var(--text3);margin-bottom:12px;" id="active-invite-msg">Selecione um convite abaixo para editar a retrospectiva dele.</p>
         <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
           <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 10px;opacity:0.5;">
             <path d="M12 16V4m0 0-4 4m4-4 4 4M4 20h16" stroke-linecap="round" stroke-linejoin="round"/>
@@ -406,9 +407,14 @@ async function uploadToStorage(file, filename) {
 }
  
 // ─── STATE ────────────────────────────────────────────────────────────────────
-let settings = { title: 'Nossa Retrospectiva', author: 'Uma coleção especial', duration: 6, admin_password: 'admin123' };
+const DEFAULT_SETTINGS = { title: 'Nossa Retrospectiva', author: 'Uma coleção especial', duration: 6, admin_password: 'admin123' };
+let baseSettings = { ...DEFAULT_SETTINGS };
+let inviteSettings = {};
+let settings = { ...DEFAULT_SETTINGS };
 let photos = [];
 let invites = [];
+let activeInvite = null;
+let currentInviteCode = localStorage.getItem('active_invite_code');
 let currentIndex = 0;
 let isPlaying = false;
 let isShuffle = false;
@@ -440,17 +446,36 @@ function setLoading(msg) {
 async function loadSettings() {
   try {
     const rows = await sb('settings?select=key,value');
-    if (rows) rows.forEach(r => { settings[r.key] = r.value; });
-    settings.duration = parseInt(settings.duration) || 6;
+    baseSettings = { ...DEFAULT_SETTINGS };
+    inviteSettings = {};
+    if (rows) {
+      rows.forEach(r => {
+        const match = String(r.key).match(/^invite:([^:]+):(title|author|duration)$/);
+        if (match) {
+          const [, code, field] = match;
+          inviteSettings[code] = inviteSettings[code] || {};
+          inviteSettings[code][field] = r.value;
+        } else {
+          baseSettings[r.key] = r.value;
+        }
+      });
+    }
+    applyActiveInviteSettings();
   } catch(e) {
     console.warn('Erro ao carregar configurações, usando padrões:', e);
+    applyActiveInviteSettings();
   }
 }
  
 async function loadPhotos() {
   try {
+    if (!activeInvite) {
+      photos = [];
+      return;
+    }
     const rows = await sb('photos?select=*&order=position.asc,created_at.asc');
-    photos = rows || [];
+    const prefix = getInviteStoragePrefix(activeInvite.code);
+    photos = (rows || []).filter(p => String(p.src || '').includes(prefix));
   } catch (e) {
     console.error('Erro ao carregar fotos:', e);
     photos = [];
@@ -458,8 +483,11 @@ async function loadPhotos() {
 }
  
 async function loadInvites() {
-  const rows = await sb('invites?select=*&order=created_at.asc');
+  const rows = await sb('invites?select=*');
   invites = rows || [];
+  if (currentInviteCode) {
+    activeInvite = invites.find(inv => inv.code === currentInviteCode) || activeInvite;
+  }
 }
  
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -474,6 +502,58 @@ function switchScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
 }
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/\r?\n/g, ' ');
+}
+
+function jsArg(value) {
+  return escapeAttr(JSON.stringify(String(value ?? '')));
+}
+
+function getInviteKey(code) {
+  return String(code || 'sem-codigo').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '-');
+}
+
+function getInviteStoragePrefix(code) {
+  return `/storage/v1/object/public/${BUCKET}/${getInviteKey(code)}/`;
+}
+
+function applyActiveInviteSettings() {
+  const code = activeInvite?.code ? getInviteKey(activeInvite.code) : null;
+  settings = {
+    ...baseSettings,
+    ...(code && inviteSettings[code] ? inviteSettings[code] : {})
+  };
+  settings.duration = parseInt(settings.duration) || 6;
+}
+
+function setActiveInvite(invite) {
+  activeInvite = invite || null;
+  currentInviteCode = activeInvite?.code || null;
+  if (currentInviteCode) localStorage.setItem('active_invite_code', currentInviteCode);
+  applyActiveInviteSettings();
+  updateActiveInviteUI();
+}
+
+function updateActiveInviteUI() {
+  const msg = document.getElementById('active-invite-msg');
+  if (msg) {
+    msg.textContent = activeInvite
+      ? `Editando retrospectiva do convite ${activeInvite.code} (${activeInvite.name || 'Convidado'})`
+      : 'Selecione um convite abaixo para editar a retrospectiva dele.';
+  }
+  renderInvites();
+}
  
 // ─── AUTH ──────────────────────────────────────────────────────────────────────
 async function tryEnter() {
@@ -486,8 +566,9 @@ async function tryEnter() {
     const rows = await sb(`invites?code=eq.${encodeURIComponent(raw)}&select=id,code,used`);
     if (rows && rows.length > 0) {
       const inv = rows[0];
+      setActiveInvite(inv);
       // Marca como usado sem exigir retorno
-      await sb(`invites?id=eq.${inv.id}`, {
+      await sb(`invites?id=eq.${encodeURIComponent(inv.id)}`, {
         method: 'PATCH',
         body: { used: true },
         prefer: 'return=minimal'
@@ -515,7 +596,7 @@ function showError(msg) {
 function promptAdmin() {
   const pwd = prompt('Senha do administrador:');
   if (!pwd) return;
-  if (pwd === settings.admin_password) {
+  if (pwd.trim() === String(settings.admin_password || 'admin123').trim()) {
     enterAdmin();
   } else {
     alert('Senha incorreta.');
@@ -528,6 +609,9 @@ async function enterAdmin() {
   switchScreen('loading-screen');
   try {
     await loadInvites();
+    const savedCode = localStorage.getItem('active_invite_code');
+    const selected = invites.find(inv => inv.code === savedCode) || invites[0] || null;
+    setActiveInvite(selected);
     await loadPhotos();
     renderInvites();
     renderPhotoGrid();
@@ -556,13 +640,23 @@ function renderInvites() {
     return;
   }
   list.innerHTML = invites.map(inv => `
-    <li class="invite-item">
-      <span class="invite-code">${inv.code}</span>
-      <span class="invite-name">${inv.name || '—'}</span>
+    <li class="invite-item" style="${activeInvite?.id === inv.id ? 'border-color:var(--gold);' : ''}">
+      <span class="invite-code">${escapeHtml(inv.code)}</span>
+      <span class="invite-name">${escapeHtml(inv.name || '—')}</span>
       <span class="invite-status ${inv.used ? 'used' : 'unused'}">${inv.used ? 'Usado' : 'Disponível'}</span>
-      <button class="btn-delete" onclick="removeInvite('${inv.id}','${inv.code}')">✕</button>
+      <button class="btn-secondary" onclick="selectInvite(${jsArg(inv.id)})" style="font-size:12px;padding:5px 10px;">Editar</button>
+      <button class="btn-delete" onclick="removeInvite(${jsArg(inv.id)}, ${jsArg(inv.code)})">✕</button>
     </li>
   `).join('');
+}
+
+async function selectInvite(id) {
+  const invite = invites.find(inv => String(inv.id) === String(id));
+  if (!invite) { toast('Convite não encontrado.'); return; }
+  setActiveInvite(invite);
+  await loadPhotos();
+  renderPhotoGrid();
+  populateSettingsForm();
 }
  
 async function addInvite() {
@@ -580,7 +674,11 @@ async function addInvite() {
       prefer: 'return=representation'
     });
     await loadInvites();
+    setActiveInvite(invites.find(inv => inv.code === code) || null);
     renderInvites();
+    await loadPhotos();
+    renderPhotoGrid();
+    populateSettingsForm();
     document.getElementById('new-code-input').value = '';
     document.getElementById('new-name-input').value = '';
     toast(`Convite "${code}" criado!`);
@@ -595,8 +693,14 @@ async function addInvite() {
 async function removeInvite(id, code) {
   if (!confirm(`Remover convite "${code}"?`)) return;
   try {
-    await sb(`invites?id=eq.${id}`, { method: 'DELETE' });
+    await sb(`invites?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
     await loadInvites();
+    if (activeInvite?.id === id) {
+      setActiveInvite(invites[0] || null);
+      await loadPhotos();
+      renderPhotoGrid();
+      populateSettingsForm();
+    }
     renderInvites();
     toast('Convite removido.');
   } catch (e) {
@@ -620,6 +724,7 @@ function copyInviteLink() {
  
 // ─── ADMIN: PHOTOS ─────────────────────────────────────────────────────────────
 async function handleFiles(files) {
+  if (!activeInvite) { toast('Selecione um convite antes de adicionar fotos.'); return; }
   const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
   if (!arr.length) { toast('Nenhuma imagem selecionada.'); return; }
  
@@ -637,8 +742,8 @@ async function handleFiles(files) {
  
     try {
       // Gera nome único
-      const ext = file.name.split('.').pop().toLowerCase();
-      const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const filename = `${getInviteKey(activeInvite.code)}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext || 'jpg'}`;
  
       // 1. Faz upload para o Storage
       const publicUrl = await uploadToStorage(file, filename);
@@ -690,29 +795,34 @@ uploadZone.addEventListener('drop', e => {
 function renderPhotoGrid() {
   const grid = document.getElementById('photo-grid');
   const msg = document.getElementById('photo-count-msg');
-  if (!photos.length) {
+  if (!activeInvite) {
     grid.innerHTML = '';
-    msg.textContent = 'Nenhuma foto adicionada ainda.';
+    msg.textContent = 'Selecione um convite para editar a retrospectiva dele.';
     return;
   }
-  msg.textContent = `${photos.length} foto${photos.length !== 1 ? 's' : ''} na retrospectiva`;
+  if (!photos.length) {
+    grid.innerHTML = '';
+    msg.textContent = `Nenhuma foto adicionada para o convite ${activeInvite.code}.`;
+    return;
+  }
+  msg.textContent = `${photos.length} foto${photos.length !== 1 ? 's' : ''} na retrospectiva do convite ${activeInvite.code}`;
   grid.innerHTML = photos.map((p, i) => `
     <div class="photo-thumb-wrap">
-      <img src="${p.src}" alt="${p.name || 'foto'}" loading="lazy">
+      <img src="${escapeAttr(p.src)}" alt="${escapeAttr(p.name || 'foto')}" loading="lazy">
       <div class="photo-thumb-overlay">
-        <button onclick="movePhoto('${p.id}', ${i}, -1)">↑ Mover</button>
-        <button onclick="movePhoto('${p.id}', ${i}, 1)">↓ Mover</button>
-        <button class="remove-btn" onclick="removePhoto('${p.id}', '${p.src}')">Remover</button>
+        <button onclick="movePhoto(${jsArg(p.id)}, ${i}, -1)">↑ Mover</button>
+        <button onclick="movePhoto(${jsArg(p.id)}, ${i}, 1)">↓ Mover</button>
+        <button class="remove-btn" onclick="removePhoto(${jsArg(p.id)}, ${jsArg(p.src)})">Remover</button>
       </div>
-      <input class="caption-input" type="text" placeholder="Legenda..." value="${(p.caption || '').replace(/"/g, '&quot;')}"
-        onchange="updateCaption('${p.id}', this.value)" onclick="event.stopPropagation()">
+      <input class="caption-input" type="text" placeholder="Legenda..." value="${escapeAttr(p.caption || '')}"
+        onchange="updateCaption(${jsArg(p.id)}, this.value)" onclick="event.stopPropagation()">
     </div>
   `).join('');
 }
  
 async function updateCaption(id, caption) {
   try {
-    await sb(`photos?id=eq.${id}`, {
+    await sb(`photos?id=eq.${encodeURIComponent(id)}`, {
       method: 'PATCH',
       body: { caption },
       prefer: 'return=minimal'
@@ -730,8 +840,8 @@ async function movePhoto(id, idx, dir) {
   if (j < 0 || j >= photos.length) return;
   const other = photos[j];
   try {
-    await sb(`photos?id=eq.${id}`, { method: 'PATCH', body: { position: j }, prefer: 'return=minimal' });
-    await sb(`photos?id=eq.${other.id}`, { method: 'PATCH', body: { position: idx }, prefer: 'return=minimal' });
+    await sb(`photos?id=eq.${encodeURIComponent(id)}`, { method: 'PATCH', body: { position: j }, prefer: 'return=minimal' });
+    await sb(`photos?id=eq.${encodeURIComponent(other.id)}`, { method: 'PATCH', body: { position: idx }, prefer: 'return=minimal' });
     [photos[idx], photos[j]] = [photos[j], photos[idx]];
     renderPhotoGrid();
   } catch (e) {
@@ -742,11 +852,12 @@ async function movePhoto(id, idx, dir) {
 async function removePhoto(id, src) {
   if (!confirm('Remover esta foto?')) return;
   try {
-    await sb(`photos?id=eq.${id}`, { method: 'DELETE' });
+    await sb(`photos?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
     // Tenta apagar do Storage (ignora erro se falhar)
     try {
-      const filename = src.split('/').pop().split('?')[0];
-      await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filename}`, {
+      const storagePrefix = `/storage/v1/object/public/${BUCKET}/`;
+      const storagePath = decodeURIComponent(src.split(storagePrefix)[1]?.split('?')[0] || src.split('/').pop().split('?')[0]);
+      await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${storagePath}`, {
         method: 'DELETE',
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
       });
@@ -761,6 +872,7 @@ async function removePhoto(id, src) {
  
 // ─── ADMIN: SETTINGS ──────────────────────────────────────────────────────────
 function populateSettingsForm() {
+  applyActiveInviteSettings();
   document.getElementById('retro-title').value = settings.title || '';
   document.getElementById('retro-author').value = settings.author || '';
   const dur = parseInt(settings.duration) || 6;
@@ -780,19 +892,35 @@ async function saveAllSettings() {
   ];
  
   try {
+    const targetCode = activeInvite ? getInviteKey(activeInvite.code) : null;
     for (const u of updates) {
-      await sb(`settings?key=eq.${u.key}`, {
-        method: 'PATCH',
-        body: { value: u.value },
-        prefer: 'return=minimal'
-      });
+      const key = targetCode ? `invite:${targetCode}:${u.key}` : u.key;
+      await upsertSetting(key, u.value);
       settings[u.key] = u.value;
     }
+    if (targetCode) inviteSettings[targetCode] = { ...inviteSettings[targetCode], title: settings.title, author: settings.author, duration: String(newDuration) };
     settings.duration = newDuration;
-    toast('✅ Configurações salvas!');
+    toast(activeInvite ? `✅ Configurações do convite ${activeInvite.code} salvas!` : '✅ Configurações salvas!');
   } catch (e) {
     toast('Erro ao salvar: ' + e.message);
     console.error(e);
+  }
+}
+
+async function upsertSetting(key, value) {
+  await sb(`settings?key=eq.${encodeURIComponent(key)}`, {
+    method: 'PATCH',
+    body: { value },
+    prefer: 'return=minimal'
+  });
+  try {
+    await sb('settings', {
+      method: 'POST',
+      body: { key, value },
+      prefer: 'return=minimal'
+    });
+  } catch (e) {
+    if (!String(e.message).includes('duplicate')) throw e;
   }
 }
  
@@ -829,6 +957,16 @@ async function goPlayer() {
   switchScreen('loading-screen');
   try {
     await loadSettings();
+    if (!activeInvite && currentInviteCode) {
+      await loadInvites();
+      setActiveInvite(invites.find(inv => inv.code === currentInviteCode) || null);
+    }
+    if (!activeInvite) {
+      toast('Selecione um convite antes de ver a retrospectiva.');
+      switchScreen(isAdmin ? 'admin-screen' : 'invite-screen');
+      return;
+    }
+    applyActiveInviteSettings();
     await loadPhotos();
     switchScreen('player-screen');
     initPlayer();
@@ -880,7 +1018,7 @@ function showPhoto(idx) {
     art.classList.remove('fade');
   }, 240);
  
-  document.getElementById('player-bg').style.backgroundImage = `url('${photo.src}')`;
+  document.getElementById('player-bg').style.backgroundImage = `url("${String(photo.src).replace(/"/g, '\\"')}")`;
   document.getElementById('track-title').textContent = photo.name || `Foto ${realIdx + 1}`;
   document.getElementById('track-caption').textContent = photo.caption || settings.author || '';
   document.getElementById('photo-counter').textContent = `${idx + 1} de ${photos.length}`;
@@ -914,7 +1052,7 @@ function updateThumbRow() {
   if (!photos.length) { row.innerHTML = ''; return; }
   row.innerHTML = photos.map((p, i) => `
     <div class="thumb-item" id="thumb-${i}" onclick="jumpToReal(${i})">
-      <img src="${p.src}" alt="${p.name || 'foto'}" loading="lazy">
+      <img src="${escapeAttr(p.src)}" alt="${escapeAttr(p.name || 'foto')}" loading="lazy">
     </div>
   `).join('');
   updateThumbActive(getOrder()[currentIndex % photos.length]);
@@ -1014,7 +1152,7 @@ async function toggleLike() {
   heart.textContent = photo.liked ? '♥' : '♡';
   heart.classList.toggle('liked', photo.liked);
   try {
-    await sb(`photos?id=eq.${photo.id}`, {
+    await sb(`photos?id=eq.${encodeURIComponent(photo.id)}`, {
       method: 'PATCH',
       body: { liked: photo.liked },
       prefer: 'return=minimal'
@@ -1072,4 +1210,5 @@ document.addEventListener('touchend', e => {
 </script>
 </body>
 </html>
+
 
