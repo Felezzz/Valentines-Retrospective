@@ -16,24 +16,20 @@
     --radius: 12px; --radius-lg: 20px;
   }
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
-
-  /* SCREENS */
+ 
   .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease, transform 0.5s ease; }
   .screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.97); }
-
-  /* LOADING */
+ 
   #loading-screen { background: var(--bg); flex-direction: column; gap: 16px; }
   .loading-logo { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--gold); letter-spacing: 0.15em; }
   .loading-bar { width: 180px; height: 2px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
   .loading-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; animation: loadpulse 1.4s ease-in-out infinite; }
   @keyframes loadpulse { 0%,100%{width:0%;margin-left:0} 50%{width:80%;margin-left:10%} }
   .loading-msg { font-size: 13px; color: var(--text3); }
-
-  /* TOAST */
+ 
   #toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 10px 20px; font-size: 13px; color: var(--text); opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* INVITE SCREEN */
+ 
   #invite-screen { background: var(--bg); flex-direction: column; }
   .invite-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(245,166,35,0.06) 0%, transparent 70%); pointer-events: none; }
   .invite-card { position: relative; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 52px 48px; width: 420px; max-width: 92vw; text-align: center; }
@@ -52,8 +48,7 @@
   .invite-error { font-size: 13px; color: #e24b4a; margin-top: 10px; min-height: 18px; }
   .invite-divider { border: none; border-top: 1px solid var(--border); margin: 32px 0 20px; }
   .invite-footer { font-size: 12px; color: var(--text3); line-height: 1.6; }
-
-  /* ADMIN SCREEN */
+ 
   #admin-screen { background: var(--bg); align-items: flex-start; overflow-y: auto; }
   .admin-wrap { width: 820px; max-width: 96vw; padding: 48px 24px; margin: 0 auto; }
   .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 12px; }
@@ -96,8 +91,7 @@
   .caption-input:focus { border-color: var(--gold); }
   .btn-secondary { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 18px; font-size: 14px; color: var(--text); cursor: pointer; transition: background 0.2s; font-family: 'Inter', sans-serif; }
   .btn-secondary:hover { background: var(--surface3); }
-
-  /* PLAYER SCREEN */
+ 
   #player-screen { background: var(--bg); flex-direction: column; overflow: hidden; }
   .player-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: background-image 1.2s ease; filter: blur(80px); transform: scale(1.1); opacity: 0.22; pointer-events: none; }
   .player-layout { position: relative; display: flex; flex-direction: column; align-items: center; height: 100vh; width: 100%; max-width: 480px; padding: 0 24px; overflow: hidden; }
@@ -143,14 +137,12 @@
   .empty-player { text-align: center; padding: 40px 24px; }
   .empty-player h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; margin-bottom: 10px; }
   .empty-player p { font-size: 14px; color: var(--text2); line-height: 1.6; }
-
-  /* FULLSCREEN */
+ 
   #fullscreen-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
   #fullscreen-overlay.visible { opacity: 1; pointer-events: all; }
   #fullscreen-overlay img { max-width: 95vw; max-height: 95vh; object-fit: contain; border-radius: 8px; }
   #fullscreen-overlay .close-fs { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 40px; height: 40px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-  /* UPLOAD PROGRESS */
+ 
   .upload-progress { background: var(--surface2); border-radius: 8px; padding: 12px; margin-top: 16px; display: none; }
   .upload-progress.visible { display: block; }
   .upload-progress-text { font-size: 12px; color: var(--text2); }
@@ -159,18 +151,15 @@
 </style>
 </head>
 <body>
-
-<!-- LOADING -->
+ 
 <div id="loading-screen" class="screen">
   <div class="loading-logo">Retrô</div>
   <div class="loading-bar"><div class="loading-bar-fill"></div></div>
   <div class="loading-msg" id="loading-msg">Conectando...</div>
 </div>
-
-<!-- TOAST -->
+ 
 <div id="toast"></div>
-
-<!-- INVITE SCREEN -->
+ 
 <div id="invite-screen" class="screen hidden">
   <div class="invite-bg"></div>
   <div class="invite-card">
@@ -186,8 +175,7 @@
     </p>
   </div>
 </div>
-
-<!-- ADMIN SCREEN -->
+ 
 <div id="admin-screen" class="screen hidden">
   <div class="admin-wrap">
     <div class="admin-header">
@@ -198,8 +186,7 @@
         <button class="btn-secondary" onclick="logout()" style="font-size:13px;padding:7px 14px;color:var(--text3);">Sair</button>
       </div>
     </div>
-
-    <!-- FOTOS -->
+ 
     <div class="admin-section">
       <div class="admin-section-title">📸 Fotos da Retrospectiva</div>
       <div class="admin-card">
@@ -210,10 +197,9 @@
           Clique ou arraste fotos aqui para adicionar
         </div>
         <input type="file" id="file-input" accept="image/*" multiple onchange="handleFiles(this.files)">
-
         <div class="photo-grid" id="photo-grid"></div>
         <div id="upload-progress" class="upload-progress">
-          <div id="upload-progress-text">Enviando...</div>
+          <div id="upload-progress-text" class="upload-progress-text">Enviando...</div>
           <div class="upload-progress-bar">
             <div id="upload-progress-fill" class="upload-progress-fill" style="width: 0%;"></div>
           </div>
@@ -221,8 +207,7 @@
         <p style="font-size:12px;color:var(--text3);margin-top:12px;" id="photo-count-msg"></p>
       </div>
     </div>
-
-    <!-- CONVITES -->
+ 
     <div class="admin-section">
       <div class="admin-section-title">🔑 Convites</div>
       <div class="admin-card">
@@ -239,8 +224,7 @@
         </div>
       </div>
     </div>
-
-    <!-- CONFIGURAÇÕES -->
+ 
     <div class="admin-section">
       <div class="admin-section-title">⚙️ Configurações</div>
       <div class="admin-card">
@@ -276,8 +260,7 @@
     <div style="height:40px;"></div>
   </div>
 </div>
-
-<!-- PLAYER SCREEN -->
+ 
 <div id="player-screen" class="screen hidden">
   <div class="player-bg" id="player-bg"></div>
   <div class="player-layout">
@@ -289,7 +272,7 @@
         <button class="player-menu-btn" id="fullscreen-img-btn" onclick="openFullscreen()" style="display:none;">⛶ Ampliar</button>
       </div>
     </div>
-
+ 
     <div id="player-empty" style="display:none;" class="empty-player">
       <svg width="64" height="64" fill="none" stroke="var(--text3)" stroke-width="1" viewBox="0 0 24 24" style="margin:0 auto 16px;display:block;">
         <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>
@@ -297,7 +280,7 @@
       <h2>Nenhuma foto ainda</h2>
       <p>O administrador ainda não adicionou fotos.<br>Volte em breve!</p>
     </div>
-
+ 
     <div id="player-content" style="display:none;flex-direction:column;align-items:center;width:100%;flex:1;overflow:hidden;">
       <div class="album-art-wrap">
         <img id="album-art" class="album-art" src="" alt="Foto atual" style="display:none;" ondblclick="openFullscreen()">
@@ -308,10 +291,10 @@
           <span>Carregando fotos...</span>
         </div>
       </div>
-
+ 
       <div class="photo-counter" id="photo-counter"></div>
       <div class="slideshow-indicator" id="dots-wrap"></div>
-
+ 
       <div class="track-info">
         <div>
           <div class="track-title" id="track-title">—</div>
@@ -319,7 +302,7 @@
         </div>
         <button class="heart-btn" id="heart-btn" onclick="toggleLike()">♡</button>
       </div>
-
+ 
       <div class="progress-wrap">
         <div class="progress-bar-track" id="prog-track" onclick="scrubProgress(event)">
           <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
@@ -329,7 +312,7 @@
           <span id="time-total">0:00</span>
         </div>
       </div>
-
+ 
       <div class="controls">
         <button class="ctrl-btn" id="shuffle-btn" onclick="toggleShuffle()" title="Aleatório">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
@@ -354,52 +337,77 @@
           </svg>
         </button>
       </div>
-
+ 
       <div class="thumb-row" id="thumb-row"></div>
     </div>
   </div>
 </div>
-
-<!-- FULLSCREEN -->
+ 
 <div id="fullscreen-overlay" onclick="closeFullscreen()">
-  <button class="close-fs" onclick="closeFullscreen()">✕</button>
+  <button class="close-fs" onclick="event.stopPropagation();closeFullscreen()">✕</button>
   <img id="fullscreen-img" src="" alt="Foto em tela cheia">
 </div>
-
+ 
 <script>
 // ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://eromoiokvtnienjojson.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_dNpa0UMEo9mBInjsCp0YJg_sjd0zyXA';
-const BUCKET = 'Photos';
-
+// CORRIGIDO: usando a anon key JWT correta
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyb21vaW9rdnRuaWVuam9qc29uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NTQwMDQsImV4cCI6MjA5NjUzMDAwNH0.iqETV9HYsQx17GQ1BCo1Ui9-YKNJjZg3cnXtfN2hNOY';
+const BUCKET = 'photos';
+ 
+// ─── SUPABASE REST HELPER ─────────────────────────────────────────────────────
 async function sb(path, opts = {}) {
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+  };
+  // Só adiciona Prefer se tiver valor
+  if (opts.prefer) headers['Prefer'] = opts.prefer;
+ 
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': opts.prefer || '',
-      ...opts.headers
-    },
+    headers,
     method: opts.method || 'GET',
     body: opts.body ? JSON.stringify(opts.body) : undefined
   });
+ 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(err);
+    throw new Error(`Supabase error ${res.status}: ${err}`);
   }
   const text = await res.text();
   if (!text) return null;
-  try {
-    return JSON.parse(text);
-  } catch(e) {
-    return null;
-  }
+  try { return JSON.parse(text); } catch(e) { return null; }
 }
-
+ 
+// ─── SUPABASE STORAGE UPLOAD ──────────────────────────────────────────────────
+async function uploadToStorage(file, filename) {
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filename}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': file.type,
+      'x-upsert': 'true'
+    },
+    body: file
+  });
+ 
+  if (!res.ok) {
+    const errText = await res.text();
+    let errMsg = `Status ${res.status}`;
+    try {
+      const errJson = JSON.parse(errText);
+      errMsg = errJson.message || errJson.error || errMsg;
+    } catch(e) { errMsg = errText || errMsg; }
+    throw new Error(errMsg);
+  }
+  return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filename}`;
+}
+ 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let settings = { title: 'Nossa Retrospectiva', author: 'Uma coleção especial', duration: 6, admin_password: 'admin123' };
-let Photos = [];
+let photos = [];
 let invites = [];
 let currentIndex = 0;
 let isPlaying = false;
@@ -410,9 +418,7 @@ let progressSec = 0;
 let playOrder = [];
 let shuffledOrder = [];
 let isAdmin = false;
-let bgMusic = null; // Placeholder for audio functionality
-const audioPlayer = new Audio();
-
+ 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   setLoading('Conectando ao banco de dados...');
@@ -423,50 +429,53 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('invite-logo-title').textContent = settings.title || 'Retrô';
   } catch (e) {
     setLoading('Erro ao conectar. Verifique as configurações do Supabase.');
-    console.error(e);
+    console.error('Init error:', e);
   }
 });
-
+ 
 function setLoading(msg) {
   document.getElementById('loading-msg').textContent = msg;
 }
-
+ 
 async function loadSettings() {
-  const rows = await sb('settings?select=key,value');
-  if (rows) rows.forEach(r => { settings[r.key] = r.value; });
-  settings.duration = parseInt(settings.duration) || 6;
-}
-
-async function loadPhotos() {
   try {
-    const rows = await sb('Photos?select=*&order=position.asc,created_at.asc');
-    Photos = rows || [];
-    console.log('Photos loaded:', Photos);
-  } catch (e) {
-    console.error('Error loading Photos:', e);
-    Photos = [];
+    const rows = await sb('settings?select=key,value');
+    if (rows) rows.forEach(r => { settings[r.key] = r.value; });
+    settings.duration = parseInt(settings.duration) || 6;
+  } catch(e) {
+    console.warn('Erro ao carregar configurações, usando padrões:', e);
   }
 }
-
+ 
+async function loadPhotos() {
+  try {
+    const rows = await sb('photos?select=*&order=position.asc,created_at.asc');
+    photos = rows || [];
+  } catch (e) {
+    console.error('Erro ao carregar fotos:', e);
+    photos = [];
+  }
+}
+ 
 async function loadInvites() {
   const rows = await sb('invites?select=*&order=created_at.asc');
   invites = rows || [];
 }
-
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-function toast(msg, duration = 2500) {
+ 
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function toast(msg, duration = 2800) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), duration);
 }
-
+ 
 function switchScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
 }
-
-// ─── AUTH ─────────────────────────────────────────────────────────────────────
+ 
+// ─── AUTH ──────────────────────────────────────────────────────────────────────
 async function tryEnter() {
   const raw = document.getElementById('code-input').value.trim().toUpperCase();
   if (!raw) return;
@@ -477,27 +486,32 @@ async function tryEnter() {
     const rows = await sb(`invites?code=eq.${encodeURIComponent(raw)}&select=id,code,used`);
     if (rows && rows.length > 0) {
       const inv = rows[0];
-      await sb(`invites?id=eq.${inv.id}`, { method: 'PATCH', body: { used: true }, prefer: 'return=minimal' });
+      // Marca como usado sem exigir retorno
+      await sb(`invites?id=eq.${inv.id}`, {
+        method: 'PATCH',
+        body: { used: true },
+        prefer: 'return=minimal'
+      });
       await goPlayer();
     } else {
       showError('Código inválido ou expirado.');
     }
   } catch (e) {
     showError('Erro ao verificar. Tente novamente.');
-    console.error(e);
+    console.error('tryEnter error:', e);
   } finally {
     btn.disabled = false;
     btn.textContent = 'Entrar';
   }
 }
-
+ 
 function showError(msg) {
   document.getElementById('error-msg').textContent = msg;
   const inp = document.getElementById('code-input');
   inp.classList.add('error');
   setTimeout(() => inp.classList.remove('error'), 500);
 }
-
+ 
 function promptAdmin() {
   const pwd = prompt('Senha do administrador:');
   if (!pwd) return;
@@ -507,7 +521,7 @@ function promptAdmin() {
     alert('Senha incorreta.');
   }
 }
-
+ 
 async function enterAdmin() {
   isAdmin = true;
   setLoading('Carregando painel...');
@@ -520,11 +534,12 @@ async function enterAdmin() {
     populateSettingsForm();
     switchScreen('admin-screen');
   } catch (e) {
-    toast('Erro ao carregar dados.');
+    toast('Erro ao carregar dados: ' + e.message);
+    console.error(e);
     switchScreen('invite-screen');
   }
 }
-
+ 
 function logout() {
   isAdmin = false;
   document.getElementById('code-input').value = '';
@@ -532,8 +547,8 @@ function logout() {
   stopTimer();
   switchScreen('invite-screen');
 }
-
-// ─── ADMIN: INVITES ───────────────────────────────────────────────────────────
+ 
+// ─── ADMIN: INVITES ────────────────────────────────────────────────────────────
 function renderInvites() {
   const list = document.getElementById('invite-list');
   if (!invites.length) {
@@ -549,20 +564,20 @@ function renderInvites() {
     </li>
   `).join('');
 }
-
+ 
 async function addInvite() {
   const code = document.getElementById('new-code-input').value.trim().toUpperCase();
   const name = document.getElementById('new-name-input').value.trim();
   if (!code) { toast('Digite um código.'); return; }
   if (invites.find(i => i.code === code)) { toast('Código já existe.'); return; }
-
+ 
   const btn = document.getElementById('add-invite-btn');
   btn.disabled = true;
   try {
     await sb('invites', {
       method: 'POST',
       body: { code, name: name || 'Convidado', used: false },
-      headers: { 'Prefer': 'return=representation' }
+      prefer: 'return=representation'
     });
     await loadInvites();
     renderInvites();
@@ -570,13 +585,13 @@ async function addInvite() {
     document.getElementById('new-name-input').value = '';
     toast(`Convite "${code}" criado!`);
   } catch (e) {
-    toast('Erro ao criar convite.');
+    toast('Erro ao criar convite: ' + e.message);
     console.error(e);
   } finally {
     btn.disabled = false;
   }
 }
-
+ 
 async function removeInvite(id, code) {
   if (!confirm(`Remover convite "${code}"?`)) return;
   try {
@@ -585,87 +600,84 @@ async function removeInvite(id, code) {
     renderInvites();
     toast('Convite removido.');
   } catch (e) {
-    toast('Erro ao remover.');
+    toast('Erro ao remover: ' + e.message);
   }
 }
-
+ 
 function generateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
   for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
   document.getElementById('new-code-input').value = code;
 }
-
+ 
 function copyInviteLink() {
   const url = window.location.href;
-  navigator.clipboard.writeText(url).then(() => toast('Link copiado!')).catch(() => toast('Copie manualmente: ' + url));
+  navigator.clipboard.writeText(url)
+    .then(() => toast('Link copiado!'))
+    .catch(() => toast('Copie manualmente: ' + url));
 }
-
-// ─── ADMIN: Photos ────────────────────────────────────────────────────────────
+ 
+// ─── ADMIN: PHOTOS ─────────────────────────────────────────────────────────────
 async function handleFiles(files) {
   const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
-  if (!arr.length) return;
-
+  if (!arr.length) { toast('Nenhuma imagem selecionada.'); return; }
+ 
   const prog = document.getElementById('upload-progress');
   const fill = document.getElementById('upload-progress-fill');
   const txt = document.getElementById('upload-progress-text');
   prog.classList.add('visible');
-
+ 
+  let successCount = 0;
+ 
   for (let i = 0; i < arr.length; i++) {
     const file = arr[i];
     txt.textContent = `Enviando ${i + 1} de ${arr.length}: ${file.name}`;
-    fill.style.width = ((i / arr.length) * 100) + '%';
-
+    fill.style.width = Math.round((i / arr.length) * 100) + '%';
+ 
     try {
-      const ext = file.name.split('.').pop();
+      // Gera nome único
+      const ext = file.name.split('.').pop().toLowerCase();
       const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-      
-      // 1. Upload to Storage
-      const uploadResponse = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filename}`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': file.type,
-          'x-upsert': 'true'
-        },
-        body: file
-      });
-
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json().catch(() => ({ message: 'Erro desconhecido' }));
-        throw new Error(errorData.message || `Status: ${uploadResponse.status}`);
-      }
-
-      // 2. Public URL
-      const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filename}`;
+ 
+      // 1. Faz upload para o Storage
+      const publicUrl = await uploadToStorage(file, filename);
+ 
+      // 2. Nome sem extensão para usar como título
       const name = file.name.replace(/\.[^.]+$/, '');
-      const position = Photos.length + i;
-
-      // 3. Save to DB
-      await sb('Photos', {
+      const position = photos.length + successCount;
+ 
+      // 3. Salva registro no banco
+      await sb('photos', {
         method: 'POST',
         body: { name, caption: '', src: publicUrl, position, liked: false },
-        headers: { 'Prefer': 'return=minimal' }
+        prefer: 'return=minimal'
       });
-
-      console.log(`Sucesso: ${filename} enviado.`);
+ 
+      successCount++;
     } catch (e) {
-      console.error('Falha no upload:', e);
-      toast(`Erro no arquivo ${file.name}: ${e.message}`);
+      console.error(`Falha no upload de ${file.name}:`, e);
+      toast(`❌ Erro em "${file.name}": ${e.message}`, 4000);
     }
   }
-
+ 
   fill.style.width = '100%';
-  txt.textContent = 'Upload concluído!';
-  setTimeout(() => prog.classList.remove('visible'), 2000);
-
+  txt.textContent = successCount === arr.length
+    ? `✅ ${successCount} foto(s) enviada(s) com sucesso!`
+    : `⚠️ ${successCount} de ${arr.length} foto(s) enviadas.`;
+ 
+  setTimeout(() => prog.classList.remove('visible'), 3000);
+ 
+  // Limpa o input para permitir re-upload do mesmo arquivo
+  document.getElementById('file-input').value = '';
+ 
   await loadPhotos();
   renderPhotoGrid();
-  toast(`${arr.length} foto(s) processada(s).`);
+ 
+  if (successCount > 0) toast(`${successCount} foto(s) adicionada(s)!`);
 }
-
-// drag & drop
+ 
+// Drag & drop
 const uploadZone = document.getElementById('upload-zone');
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
@@ -674,112 +686,134 @@ uploadZone.addEventListener('drop', e => {
   uploadZone.classList.remove('dragover');
   handleFiles(e.dataTransfer.files);
 });
-
+ 
 function renderPhotoGrid() {
   const grid = document.getElementById('photo-grid');
   const msg = document.getElementById('photo-count-msg');
-  if (!Photos.length) {
+  if (!photos.length) {
     grid.innerHTML = '';
     msg.textContent = 'Nenhuma foto adicionada ainda.';
     return;
   }
-  msg.textContent = `${Photos.length} foto${Photos.length !== 1 ? 's' : ''} na retrospectiva`;
-  grid.innerHTML = Photos.map((p, i) => `
+  msg.textContent = `${photos.length} foto${photos.length !== 1 ? 's' : ''} na retrospectiva`;
+  grid.innerHTML = photos.map((p, i) => `
     <div class="photo-thumb-wrap">
-      <img src="${p.src}" alt="${p.name}" loading="lazy">
+      <img src="${p.src}" alt="${p.name || 'foto'}" loading="lazy">
       <div class="photo-thumb-overlay">
         <button onclick="movePhoto('${p.id}', ${i}, -1)">↑ Mover</button>
         <button onclick="movePhoto('${p.id}', ${i}, 1)">↓ Mover</button>
         <button class="remove-btn" onclick="removePhoto('${p.id}', '${p.src}')">Remover</button>
       </div>
-      <input class="caption-input" type="text" placeholder="Legenda..." value="${p.caption || ''}"
+      <input class="caption-input" type="text" placeholder="Legenda..." value="${(p.caption || '').replace(/"/g, '&quot;')}"
         onchange="updateCaption('${p.id}', this.value)" onclick="event.stopPropagation()">
     </div>
   `).join('');
 }
-
+ 
 async function updateCaption(id, caption) {
   try {
-    await sb(`Photos?id=eq.${id}`, { method: 'PATCH', body: { caption }, headers: { 'Prefer': 'return=minimal' } });
-    const p = Photos.find(p => p.id === id);
+    await sb(`photos?id=eq.${id}`, {
+      method: 'PATCH',
+      body: { caption },
+      prefer: 'return=minimal'
+    });
+    const p = photos.find(p => p.id === id);
     if (p) p.caption = caption;
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    console.error('Erro ao salvar legenda:', e);
+    toast('Erro ao salvar legenda.');
+  }
 }
-
+ 
 async function movePhoto(id, idx, dir) {
   const j = idx + dir;
-  if (j < 0 || j >= Photos.length) return;
-  const other = Photos[j];
-  const current = Photos[idx];
+  if (j < 0 || j >= photos.length) return;
+  const other = photos[j];
   try {
-    await sb(`Photos?id=eq.${id}`, { method: 'PATCH', body: { position: j }, headers: { 'Prefer': 'return=minimal' } });
-    await sb(`Photos?id=eq.${other.id}`, { method: 'PATCH', body: { position: idx }, headers: { 'Prefer': 'return=minimal' } });
-    [Photos[idx], Photos[j]] = [Photos[j], Photos[idx]];
+    await sb(`photos?id=eq.${id}`, { method: 'PATCH', body: { position: j }, prefer: 'return=minimal' });
+    await sb(`photos?id=eq.${other.id}`, { method: 'PATCH', body: { position: idx }, prefer: 'return=minimal' });
+    [photos[idx], photos[j]] = [photos[j], photos[idx]];
     renderPhotoGrid();
-  } catch (e) { toast('Erro ao reordenar.'); }
+  } catch (e) {
+    toast('Erro ao reordenar: ' + e.message);
+  }
 }
-
+ 
 async function removePhoto(id, src) {
   if (!confirm('Remover esta foto?')) return;
   try {
-    await sb(`Photos?id=eq.${id}`, { method: 'DELETE' });
-    const filename = src.split('/').pop();
-    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filename}`, {
-      method: 'DELETE',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    }).catch(() => {});
+    await sb(`photos?id=eq.${id}`, { method: 'DELETE' });
+    // Tenta apagar do Storage (ignora erro se falhar)
+    try {
+      const filename = src.split('/').pop().split('?')[0];
+      await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filename}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+    } catch(e) { /* ignora */ }
     await loadPhotos();
     renderPhotoGrid();
     toast('Foto removida.');
-  } catch (e) { toast('Erro ao remover foto.'); }
+  } catch (e) {
+    toast('Erro ao remover foto: ' + e.message);
+  }
 }
-
-// ─── ADMIN: SETTINGS ─────────────────────────────────────────────────────────
+ 
+// ─── ADMIN: SETTINGS ──────────────────────────────────────────────────────────
 function populateSettingsForm() {
   document.getElementById('retro-title').value = settings.title || '';
   document.getElementById('retro-author').value = settings.author || '';
-  document.getElementById('slide-duration').value = settings.duration || 6;
-  document.getElementById('duration-out').textContent = (settings.duration || 6) + 's';
+  const dur = parseInt(settings.duration) || 6;
+  document.getElementById('slide-duration').value = dur;
+  document.getElementById('duration-out').textContent = dur + 's';
 }
-
+ 
 async function saveAllSettings() {
   const newTitle = document.getElementById('retro-title').value.trim();
   const newAuthor = document.getElementById('retro-author').value.trim();
   const newDuration = parseInt(document.getElementById('slide-duration').value);
-
+ 
   const updates = [
     { key: 'title', value: newTitle || 'Nossa Retrospectiva' },
     { key: 'author', value: newAuthor || 'Uma coleção especial' },
     { key: 'duration', value: String(newDuration) }
   ];
-
+ 
   try {
     for (const u of updates) {
-      await sb(`settings?key=eq.${u.key}`, { method: 'PATCH', body: { value: u.value }, headers: { 'Prefer': 'return=minimal' } });
+      await sb(`settings?key=eq.${u.key}`, {
+        method: 'PATCH',
+        body: { value: u.value },
+        prefer: 'return=minimal'
+      });
       settings[u.key] = u.value;
     }
     settings.duration = newDuration;
-    toast('Configurações salvas!');
+    toast('✅ Configurações salvas!');
   } catch (e) {
-    toast('Erro ao salvar configurações.');
+    toast('Erro ao salvar: ' + e.message);
     console.error(e);
   }
 }
-
+ 
 async function changeAdminPwd() {
   const val = document.getElementById('admin-password').value.trim();
   if (!val || val.length < 4) { toast('Senha precisa ter pelo menos 4 caracteres.'); return; }
   try {
-    await sb('settings?key=eq.admin_password', { method: 'PATCH', body: { value: val }, headers: { 'Prefer': 'return=minimal' } });
+    await sb('settings?key=eq.admin_password', {
+      method: 'PATCH',
+      body: { value: val },
+      prefer: 'return=minimal'
+    });
     settings.admin_password = val;
     document.getElementById('admin-password').value = '';
-    toast('Senha alterada com sucesso!');
+    toast('✅ Senha alterada com sucesso!');
   } catch (e) {
-    toast('Erro ao alterar senha.');
+    toast('Erro ao alterar senha: ' + e.message);
   }
 }
-
-// ─── PLAYER ───────────────────────────────────────────────────────────────────
+ 
+// ─── PLAYER ────────────────────────────────────────────────────────────────────
 function exitPlayer() {
   isPlaying = false;
   stopTimer();
@@ -789,7 +823,7 @@ function exitPlayer() {
     logout();
   }
 }
-
+ 
 async function goPlayer() {
   setLoading('Carregando retrospectiva...');
   switchScreen('loading-screen');
@@ -800,42 +834,43 @@ async function goPlayer() {
     initPlayer();
   } catch (e) {
     console.error('Erro ao entrar no player:', e);
-    toast('Erro ao carregar retrospectiva.');
+    toast('Erro ao carregar retrospectiva: ' + e.message);
     switchScreen('invite-screen');
   }
 }
-
+ 
 function initPlayer() {
   document.getElementById('player-brand-title').textContent = settings.title || 'Retrô';
-  document.getElementById('speed-btn').textContent = settings.duration + 's';
-
-  if (!Photos.length) {
+  document.getElementById('speed-btn').textContent = (settings.duration || 6) + 's';
+ 
+  if (!photos.length) {
     document.getElementById('player-empty').style.display = 'flex';
     document.getElementById('player-content').style.display = 'none';
     return;
   }
   document.getElementById('player-empty').style.display = 'none';
   document.getElementById('player-content').style.display = 'flex';
-
-  playOrder = Photos.map((_, i) => i);
+ 
+  playOrder = photos.map((_, i) => i);
   buildShuffledOrder();
   currentIndex = 0;
   updateThumbRow();
   showPhoto(0);
 }
-
+ 
 function buildShuffledOrder() {
   shuffledOrder = [...playOrder].sort(() => Math.random() - 0.5);
 }
-
+ 
 function getOrder() { return isShuffle ? shuffledOrder : playOrder; }
-
+ 
 function showPhoto(idx) {
-  if (!Photos.length) return;
+  if (!photos.length) return;
   const order = getOrder();
   const realIdx = order[idx % order.length];
-  const photo = Photos[realIdx];
-
+  const photo = photos[realIdx];
+  if (!photo) return;
+ 
   const art = document.getElementById('album-art');
   art.classList.add('fade');
   setTimeout(() => {
@@ -844,53 +879,53 @@ function showPhoto(idx) {
     document.getElementById('album-placeholder').style.display = 'none';
     art.classList.remove('fade');
   }, 240);
-
+ 
   document.getElementById('player-bg').style.backgroundImage = `url('${photo.src}')`;
   document.getElementById('track-title').textContent = photo.name || `Foto ${realIdx + 1}`;
   document.getElementById('track-caption').textContent = photo.caption || settings.author || '';
-  document.getElementById('photo-counter').textContent = `${idx + 1} de ${Photos.length}`;
-
+  document.getElementById('photo-counter').textContent = `${idx + 1} de ${photos.length}`;
+ 
   const heart = document.getElementById('heart-btn');
   heart.textContent = photo.liked ? '♥' : '♡';
   heart.classList.toggle('liked', !!photo.liked);
   document.getElementById('fullscreen-img-btn').style.display = 'block';
-
+ 
   updateDots(idx);
   updateThumbActive(realIdx);
   updateTimerDisplay();
   resetProgress();
 }
-
+ 
 function updateDots(activeIdx) {
-  const max = Math.min(Photos.length, 20);
+  const max = Math.min(photos.length, 20);
   document.getElementById('dots-wrap').innerHTML = Array.from({ length: max }, (_, i) => `
     <div class="dot ${i === activeIdx % max ? 'active' : ''}" onclick="jumpTo(${i})"></div>
   `).join('');
 }
-
+ 
 function jumpTo(i) {
   currentIndex = i;
   showPhoto(currentIndex);
   if (isPlaying) resetTimer();
 }
-
+ 
 function updateThumbRow() {
   const row = document.getElementById('thumb-row');
-  if (!Photos.length) { row.innerHTML = ''; return; }
-  row.innerHTML = Photos.map((p, i) => `
+  if (!photos.length) { row.innerHTML = ''; return; }
+  row.innerHTML = photos.map((p, i) => `
     <div class="thumb-item" id="thumb-${i}" onclick="jumpToReal(${i})">
-      <img src="${p.src}" alt="${p.name}" loading="lazy">
+      <img src="${p.src}" alt="${p.name || 'foto'}" loading="lazy">
     </div>
   `).join('');
-  updateThumbActive(getOrder()[currentIndex % Photos.length]);
+  updateThumbActive(getOrder()[currentIndex % photos.length]);
 }
-
+ 
 function updateThumbActive(realIdx) {
   document.querySelectorAll('.thumb-item').forEach((t, i) => t.classList.toggle('active', i === realIdx));
   const el = document.getElementById(`thumb-${realIdx}`);
   if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 }
-
+ 
 function jumpToReal(realIdx) {
   const order = getOrder();
   const idx = order.indexOf(realIdx);
@@ -899,8 +934,8 @@ function jumpToReal(realIdx) {
   if (isPlaying) resetTimer();
   updateThumbActive(realIdx);
 }
-
-// ─── PLAYBACK ─────────────────────────────────────────────────────────────────
+ 
+// ─── PLAYBACK ──────────────────────────────────────────────────────────────────
 function togglePlay() {
   isPlaying = !isPlaying;
   document.getElementById('play-icon').innerHTML = isPlaying
@@ -912,7 +947,7 @@ function togglePlay() {
     stopTimer();
   }
 }
-
+ 
 function startTimer() {
   stopTimer();
   progressInterval = setInterval(() => {
@@ -926,58 +961,67 @@ function startTimer() {
     }
   }, 100);
 }
-
+ 
 function stopTimer() {
   if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
 }
-
+ 
 function resetTimer() { if (isPlaying) { stopTimer(); startTimer(); } }
-function resetProgress() { progressSec = 0; document.getElementById('prog-fill').style.width = '0%'; document.getElementById('time-cur').textContent = '0:00'; }
-function updateTimerDisplay() { document.getElementById('time-total').textContent = formatTime(settings.duration); }
-function formatTime(sec) { const s = Math.floor(sec); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
-
+function resetProgress() {
+  progressSec = 0;
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('time-cur').textContent = '0:00';
+}
+function updateTimerDisplay() {
+  document.getElementById('time-total').textContent = formatTime(settings.duration);
+}
+function formatTime(sec) {
+  const s = Math.floor(sec);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+ 
 function nextPhoto() {
-  currentIndex = (currentIndex + 1) % Photos.length;
+  currentIndex = (currentIndex + 1) % photos.length;
   showPhoto(currentIndex);
-  updateThumbActive(getOrder()[currentIndex % Photos.length]);
   if (isPlaying) { stopTimer(); startTimer(); }
 }
-
+ 
 function prevPhoto() {
-  currentIndex = (currentIndex - 1 + Photos.length) % Photos.length;
+  currentIndex = (currentIndex - 1 + photos.length) % photos.length;
   showPhoto(currentIndex);
-  updateThumbActive(getOrder()[currentIndex % Photos.length]);
   if (isPlaying) { stopTimer(); startTimer(); }
 }
-
+ 
 function toggleShuffle() {
   isShuffle = !isShuffle;
   document.getElementById('shuffle-btn').classList.toggle('active', isShuffle);
   if (isShuffle) buildShuffledOrder();
 }
-
+ 
 function toggleRepeat() {
   isRepeat = !isRepeat;
   document.getElementById('repeat-btn').classList.toggle('active', isRepeat);
 }
-
+ 
 async function toggleLike() {
-  if (!Photos.length) return;
+  if (!photos.length) return;
   const order = getOrder();
   const realIdx = order[currentIndex % order.length];
-  Photos[realIdx].liked = !Photos[realIdx].liked;
+  const photo = photos[realIdx];
+  if (!photo) return;
+  photo.liked = !photo.liked;
   const heart = document.getElementById('heart-btn');
-  heart.textContent = Photos[realIdx].liked ? '♥' : '♡';
-  heart.classList.toggle('liked', Photos[realIdx].liked);
+  heart.textContent = photo.liked ? '♥' : '♡';
+  heart.classList.toggle('liked', photo.liked);
   try {
-    await sb(`Photos?id=eq.${Photos[realIdx].id}`, {
+    await sb(`photos?id=eq.${photo.id}`, {
       method: 'PATCH',
-      body: { liked: Photos[realIdx].liked },
-      headers: { 'Prefer': 'return=minimal' }
+      body: { liked: photo.liked },
+      prefer: 'return=minimal'
     });
-  } catch (e) { console.error(e); }
+  } catch (e) { console.error('Erro ao salvar like:', e); }
 }
-
+ 
 function scrubProgress(e) {
   const rect = document.getElementById('prog-track').getBoundingClientRect();
   const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -985,25 +1029,27 @@ function scrubProgress(e) {
   document.getElementById('prog-fill').style.width = (pct * 100) + '%';
   document.getElementById('time-cur').textContent = formatTime(progressSec);
 }
-
+ 
 function cycleSpeed() {
   const speeds = [3, 6, 10, 15, 20];
-  const cur = speeds.indexOf(settings.duration);
-  settings.duration = speeds[(cur + 1) % speeds.length];
+  const cur = speeds.indexOf(parseInt(settings.duration));
+  settings.duration = speeds[cur !== -1 ? (cur + 1) % speeds.length : 1];
   document.getElementById('speed-btn').textContent = settings.duration + 's';
   updateTimerDisplay();
 }
-
+ 
 // ─── FULLSCREEN ────────────────────────────────────────────────────────────────
 function openFullscreen() {
-  if (!Photos.length) return;
-  const realIdx = getOrder()[currentIndex % Photos.length];
-  document.getElementById('fullscreen-img').src = Photos[realIdx].src;
+  if (!photos.length) return;
+  const realIdx = getOrder()[currentIndex % photos.length];
+  document.getElementById('fullscreen-img').src = photos[realIdx].src;
   document.getElementById('fullscreen-overlay').classList.add('visible');
 }
-function closeFullscreen() { document.getElementById('fullscreen-overlay').classList.remove('visible'); }
-
-// ─── KEYBOARD ─────────────────────────────────────────────────────────────────
+function closeFullscreen() {
+  document.getElementById('fullscreen-overlay').classList.remove('visible');
+}
+ 
+// ─── KEYBOARD ──────────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   const active = document.querySelector('.screen:not(.hidden)');
   if (active?.id === 'invite-screen' && e.key === 'Enter') tryEnter();
@@ -1014,8 +1060,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'f' || e.key === 'F') openFullscreen();
   if (e.key === 'Escape') closeFullscreen();
 });
-
-// ─── TOUCH SWIPE ─────────────────────────────────────────────────────────────
+ 
+// ─── TOUCH SWIPE ───────────────────────────────────────────────────────────────
 let touchStartX = 0;
 document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
 document.addEventListener('touchend', e => {
@@ -1026,3 +1072,4 @@ document.addEventListener('touchend', e => {
 </script>
 </body>
 </html>
+
