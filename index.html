@@ -186,7 +186,18 @@
         <button class="btn-secondary" onclick="logout()" style="font-size:13px;padding:7px 14px;color:var(--text3);">Sair</button>
       </div>
     </div>
- 
+
+<div class="admin-card">
+  <label>Perfil</label>
+
+  <select id="profile-select" onchange="changeProfile()">
+  </select>
+
+  <button class="btn-add" onclick="createProfile()">
+    + Novo Perfil
+  </button>
+</div>
+   
     <div class="admin-section">
       <div class="admin-section-title">📸 Fotos da Retrospectiva</div>
       <div class="admin-card">
@@ -418,6 +429,8 @@ let progressSec = 0;
 let playOrder = [];
 let shuffledOrder = [];
 let isAdmin = false;
+let currentProfileId = null;
+let profiles = [];
  
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
@@ -448,13 +461,17 @@ async function loadSettings() {
 }
  
 async function loadPhotos() {
-  try {
-    const rows = await sb('photos?select=*&order=position.asc,created_at.asc');
-    photos = rows || [];
-  } catch (e) {
-    console.error('Erro ao carregar fotos:', e);
+
+  if (!currentProfileId) {
     photos = [];
+    return;
   }
+
+  const rows = await sb(
+    `photos?profile_id=eq.${currentProfileId}&select=*&order=position.asc`
+  );
+
+  photos = rows || [];
 }
  
 async function loadInvites() {
@@ -483,16 +500,22 @@ async function tryEnter() {
   btn.disabled = true;
   btn.textContent = 'Verificando...';
   try {
-    const rows = await sb(`invites?code=eq.${encodeURIComponent(raw)}&select=id,code,used`);
+    const rows = await sb(`profiles?invite_code=eq.${raw}&select=*`);
     if (rows && rows.length > 0) {
       const inv = rows[0];
+      const profile = rows[0];
+     localStorage.setItem('current_profile',profile.id);
+     
       // Marca como usado sem exigir retorno
       await sb(`invites?id=eq.${inv.id}`, {
         method: 'PATCH',
         body: { used: true },
         prefer: 'return=minimal'
       });
-      await goPlayer();
+      await goPlayer(currentProfileId =
+localStorage.getItem('current_profile');
+    await loadPhotos();
+                    );
     } else {
       showError('Código inválido ou expirado.');
     }
@@ -617,6 +640,79 @@ function copyInviteLink() {
     .then(() => toast('Link copiado!'))
     .catch(() => toast('Copie manualmente: ' + url));
 }
+
+ async function loadRetro() {
+
+  const rows = await sb(
+    `retrospectives?profile_id=eq.${currentProfileId}&select=*`
+  );
+
+  if (!rows.length) return;
+
+  const retro = rows[0];
+
+  settings.title =
+    retro.title;
+
+  settings.author =
+    retro.subtitle;
+
+  settings.duration =
+    retro.duration;
+}
+ 
+ async function loadProfiles() {
+  profiles = await sb('profiles?select=*');
+
+  const select = document.getElementById('profile-select');
+
+  select.innerHTML = profiles.map(p => `
+    <option value="${p.id}">
+      ${p.name}
+    </option>
+  `).join('');
+
+  if (profiles.length) {
+    currentProfileId = profiles[0].id;
+  }
+}
+
+ async function changeProfile() {
+
+  currentProfileId =
+    document.getElementById('profile-select').value;
+
+  await loadPhotos();
+
+  renderPhotoGrid();
+
+  await loadRetro();
+}
+
+async function createProfile() {
+
+ const name =
+    prompt('Nome do perfil');
+
+  if (!name) return;
+
+  const code =
+    prompt('Código do convite');
+
+  if (!code) return;
+
+  await sb('profiles', {
+    method:'POST',
+    body:{
+      name,
+      invite_code: code
+    }
+  });
+
+  await loadProfiles();
+
+  toast('Perfil criado!');
+}
  
 // ─── ADMIN: PHOTOS ─────────────────────────────────────────────────────────────
 async function handleFiles(files) {
@@ -650,9 +746,13 @@ async function handleFiles(files) {
       // 3. Salva registro no banco
       await sb('photos', {
         method: 'POST',
-        body: { name, caption: '', src: publicUrl, position, liked: false },
-        prefer: 'return=minimal'
-      });
+        body: {profile_id: currentProfileId,
+  name,
+  caption:'',
+  src: publicUrl,
+  position,
+  liked:false
+}});
  
       successCount++;
     } catch (e) {
