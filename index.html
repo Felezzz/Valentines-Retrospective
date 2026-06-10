@@ -494,6 +494,8 @@ function switchScreen(id) {
  
 // ─── AUTH ──────────────────────────────────────────────────────────────────────
 async function tryEnter() {
+  currentProfileId =
+localStorage.getItem('current_profile');
   const raw = document.getElementById('code-input').value.trim().toUpperCase();
   if (!raw) return;
   const btn = document.getElementById('enter-btn');
@@ -512,10 +514,12 @@ async function tryEnter() {
         body: { used: true },
         prefer: 'return=minimal'
       });
-      await goPlayer(currentProfileId =
-localStorage.getItem('current_profile');
-    await loadPhotos();
-                    );
+      localStorage.setItem('current_profile', profile.id);
+
+currentProfileId = profile.id;
+
+await loadPhotos();
+await goPlayer();
     } else {
       showError('Código inválido ou expirado.');
     }
@@ -552,6 +556,7 @@ async function enterAdmin() {
   try {
     await loadInvites();
     await loadPhotos();
+    await loadProfiles();
     renderInvites();
     renderPhotoGrid();
     populateSettingsForm();
@@ -660,6 +665,21 @@ function copyInviteLink() {
   settings.duration =
     retro.duration;
 }
+
+ async function saveRetro() {
+
+  await sb('retrospectives', {
+    method: 'POST',
+    body: {
+      profile_id: currentProfileId,
+      title: document.getElementById('retro-title').value,
+      subtitle: document.getElementById('retro-author').value,
+      duration: document.getElementById('slide-duration').value
+    }
+  });
+
+  toast('Retrospectiva salva!');
+}
  
  async function loadProfiles() {
   profiles = await sb('profiles?select=*');
@@ -716,6 +736,10 @@ async function createProfile() {
  
 // ─── ADMIN: PHOTOS ─────────────────────────────────────────────────────────────
 async function handleFiles(files) {
+  if (!currentProfileId) {
+  toast('Selecione um perfil primeiro.');
+  return;
+}
   const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
   if (!arr.length) { toast('Nenhuma imagem selecionada.'); return; }
  
@@ -734,7 +758,7 @@ async function handleFiles(files) {
     try {
       // Gera nome único
       const ext = file.name.split('.').pop().toLowerCase();
-      const filename = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const filename =`${currentProfileId}/${Date.now()}_${Math.random()}.${ext}`;
  
       // 1. Faz upload para o Storage
       const publicUrl = await uploadToStorage(file, filename);
