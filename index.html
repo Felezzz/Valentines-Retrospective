@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Retrospectiva</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=700;800;900&family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #121212; /* Preto Spotify */
+    --bg: #121212;
     --surface: #181818;
     --surface2: #282828;
     --spotify-green: #1DB954;
@@ -19,31 +19,21 @@
     --text2: #b3b3b3;
     --radius: 8px;
     --radius-lg: 12px;
-    
-    /* Cores vibrantes estilo Wrapped */
     --wrapped-pink: #ff4b91;
     --wrapped-yellow: #ffcd38;
     --wrapped-orange: #ff763b;
     --wrapped-blue: #1d75ff;
   }
-  
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
-  
-  h1, h2, h3, .spotify-font { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: -0.03em; }
-
+  h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: -0.03em; }
   .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); z-index: 10; }
   .screen.hidden { opacity: 0; pointer-events: none; transform: scale(1.03) translateY(20px); }
- 
-  /* Loading screen */
   #loading-screen { background: #000; flex-direction: column; gap: 20px; }
   .spotify-loader { width: 50px; height: 50px; border: 4px solid var(--surface2); border-top-color: var(--spotify-green); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-msg { font-size: 14px; color: var(--text2); font-weight: 500; }
- 
   #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--wrapped-blue); border-radius: 4px; padding: 12px 24px; font-size: 14px; font-weight: bold; color: white; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
- 
-  /* Invite screen */
   #invite-screen { background: linear-gradient(135deg, #1e0034 0%, #000000 100%); flex-direction: column; }
   .invite-card { background: transparent; text-align: center; width: 440px; max-width: 90vw; padding: 20px; }
   .wrapped-badge { display: inline-block; background: var(--spotify-green); color: #000; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px; letter-spacing: 0.1em; }
@@ -51,14 +41,9 @@
   .invite-subtitle { font-size: 16px; color: var(--text2); margin-bottom: 32px; font-weight: 400; line-height: 1.5; }
   .invite-input { width: 100%; background: var(--surface2); border: 2px solid transparent; border-radius: 50px; padding: 16px 24px; font-size: 16px; font-weight: 600; color: var(--text); text-align: center; outline: none; transition: all 0.2s; margin-bottom: 16px; }
   .invite-input:focus { border-color: white; background: #333; }
-  .invite-input.error { border-color: var(--wrapped-pink); animation: shake 0.35s ease; }
-  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
   .spotify-btn { width: 100%; background: var(--spotify-green); border: none; border-radius: 50px; padding: 16px; font-size: 16px; font-weight: 700; color: #000; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; }
   .spotify-btn:hover { background: var(--spotify-green-hover); transform: scale(1.03); }
-  .spotify-btn:active { transform: scale(0.99); }
   .invite-footer { font-size: 13px; color: var(--text2); margin-top: 32px; }
- 
-  /* Admin Dashboard */
   #admin-screen { background: #121212; align-items: flex-start; overflow-y: auto; }
   .admin-wrap { width: 850px; max-width: 96vw; padding: 40px 20px; margin: 0 auto; }
   .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
@@ -68,96 +53,68 @@
   .admin-section-title { font-size: 18px; color: #fff; margin-bottom: 16px; border-left: 4px solid var(--spotify-green); padding-left: 10px; }
   .admin-card { background: var(--surface); border-radius: var(--radius-lg); padding: 24px; }
   .invite-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-  .invite-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--surface2); border-radius: var(--radius); transition: background 0.2s; cursor: pointer; }
+  .invite-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--surface2); border-radius: var(--radius); cursor: pointer; }
   .invite-item:hover { background: #333; }
   .invite-code { font-weight: 700; color: var(--spotify-green); }
   .btn-delete { background: none; border: none; color: #ff5555; cursor: pointer; font-size: 14px; font-weight: bold; }
-  
   .add-invite-row { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
   .add-invite-row input, .admin-card input[type="text"], .admin-card input[type="date"] { flex: 1; min-width: 150px; background: var(--surface2); border: 1px solid transparent; border-radius: 4px; padding: 12px; color: #fff; outline: none; font-family: inherit; }
-  .add-invite-row input:focus, .admin-card input:focus { border-color: var(--text2); }
-  
   .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin-top: 16px; }
   .photo-thumb-wrap { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; background: #000; }
   .photo-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
   .photo-thumb-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
   .photo-thumb-wrap:hover .photo-thumb-overlay { opacity: 1; }
   .photo-thumb-overlay button { background: #ff4b91; border: none; color: white; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
-
   .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   @media(max-width: 600px){ .config-grid { grid-template-columns: 1fr; } }
   .input-block { display: flex; flex-direction: column; gap: 6px; }
   .input-block label { font-size: 13px; color: var(--text2); font-weight: 600; }
   .admin-card textarea { background: var(--surface2); border: none; border-radius: 4px; padding: 12px; color: white; height: 80px; resize: none; font-family: inherit; outline: none; }
-
-  /* Spotify Player Screen */
   #player-screen { background: #121212; flex-direction: column; justify-content: space-between; padding: 20px; }
   .player-container { width: 100%; max-width: 420px; display: flex; flex-direction: column; height: 100%; justify-content: space-between; position: relative; }
-  
   .story-progress-container { display: flex; gap: 4px; width: 100%; padding: 10px 0; }
   .story-bar-bg { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
   .story-bar-fill { height: 100%; width: 0%; background: #fff; }
-
   .player-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 5px; }
   .context-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text2); font-weight: 700; }
-  
   .center-content-box { position: relative; width: 100%; aspect-ratio: 1; background: #282828; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.6); margin: 20px 0; display: flex; align-items: center; justify-content: center; }
   .spotify-art { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; transition: opacity 0.3s ease; }
-  
   .wrapped-counter-widget { position: absolute; inset: 0; background: linear-gradient(180deg, var(--wrapped-pink) 0%, #4a0e4e 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; color: white; z-index: 2; box-sizing: border-box; }
   .counter-badge { background: #fff; color: #000; font-size: 12px; font-weight: 900; padding: 4px 12px; border-radius: 20px; margin-bottom: 24px; text-transform: uppercase; }
   .counter-big-text { font-size: 46px; line-height: 1; color: var(--wrapped-yellow); margin-bottom: 12px; text-transform: uppercase; }
   .counter-sub { font-size: 16px; font-weight: 500; color: #fff; line-height: 1.4; }
-
   .wrapped-message-widget { position: absolute; inset: 0; background: linear-gradient(135deg, #004f7a 0%, var(--wrapped-orange) 100%); display: flex; flex-direction: column; justify-content: space-between; padding: 24px; text-align: left; z-index: 3; overflow-y: auto; }
   .msg-bubble { background: rgba(0, 0, 0, 0.4); padding: 20px; border-radius: var(--radius-lg); font-size: 16px; font-style: italic; line-height: 1.6; color: #fff; border-left: 4px solid var(--wrapped-yellow); max-height: 160px; overflow-y: auto; margin-bottom: 12px; }
-  .leave-msg-box { display: flex; flex-direction: column; gap: 8px; background: rgba(255,255,255,0.1); padding: 12px; border-radius: var(--radius); }
-  .leave-msg-box input { background: rgba(0,0,0,0.3); border: none; padding: 10px; color: white; border-radius: 4px; font-size: 13px; outline: none; }
-  .leave-msg-box button { background: white; color: black; border: none; padding: 8px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 12px; }
-
   .meta-container { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .meta-text { display: flex; flex-direction: column; max-width: 80%; }
   .meta-title { font-size: 22px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .meta-author { font-size: 14px; color: var(--text2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  
   .spotify-progress-wrapper { width: 100%; margin-bottom: 20px; }
   .spotify-track-line { height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; width: 100%; position: relative; cursor: pointer; }
   .spotify-track-fill { height: 100%; background: #fff; width: 0%; border-radius: 2px; }
-  .spotify-track-line:hover .spotify-track-fill { background: var(--spotify-green); }
   .spotify-time-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-top: 8px; }
-
   .spotify-controls-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 10px; margin-bottom: 20px; }
-  .icon-btn { background: none; border: none; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
-  .icon-btn:hover { color: #fff; }
+  .icon-btn { background: none; border: none; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .icon-btn.active { color: var(--spotify-green); }
-  
-  .master-play-btn { background: #fff; border: none; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s; }
-  .master-play-btn:hover { transform: scale(1.05); }
+  .master-play-btn { background: #fff; border: none; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .master-play-btn svg { fill: #000; width: 24px; height: 24px; }
 </style>
 </head>
 <body>
 
 <audio id="bg-music" loop crossorigin="anonymous"></audio>
- 
-<div id="loading-screen" class="screen">
-  <div class="spotify-loader"></div>
-  <div class="loading-msg" id="loading-msg">Carregando sua retrospectiva...</div>
-</div>
- 
+<div id="loading-screen" class="screen"><div class="spotify-loader"></div><div class="loading-msg" id="loading-msg">Carregando...</div></div>
 <div id="toast"></div>
  
 <div id="invite-screen" class="screen hidden">
   <div class="invite-card">
     <div class="wrapped-badge">Nossa Retrospectiva</div>
-    <h1 class="invite-title">Uma pequena lembrança para o amor da minha vida</h1>
+    <h1 class="invite-title">Uma lembrança para o amor da minha vida</h1>
     <p class="invite-subtitle">O amor tudo espera, tudo suporta...</p>
-    <input id="code-input" class="invite-input" type="text" placeholder="CÓDIGO DE ACESSO" maxlength="16" autocomplete="off">
+    <input id="code-input" class="invite-input" type="text" placeholder="CÓDIGO DE ACESSO" maxlength="16">
     <button class="spotify-btn" onclick="tryEnter()">Ouvir Agora</button>
     <div id="error-msg" style="color:var(--wrapped-pink); font-size:14px; margin-top:12px; font-weight:bold;"></div>
-    <p class="invite-footer">É o criador deste painel? 
-      <a href="#" onclick="promptAdmin()" style="color:var(--spotify-green); text-decoration:none; font-weight:bold;">Acessar Admin</a>
-    </p>
+    <p class="invite-footer"><a href="#" onclick="promptAdmin()" style="color:var(--spotify-green); text-decoration:none; font-weight:bold;">Acessar Admin</a></p>
   </div>
 </div>
  
@@ -187,31 +144,13 @@
       <div class="admin-section-title">⚙️ Configurações do Perfil Selecionado</div>
       <div class="admin-card">
         <p style="font-size:13px; color:var(--text2); margin-bottom:16px;" id="active-invite-msg">Selecione um convite acima para começar a configurar.</p>
-        
         <div class="config-grid">
-          <div class="input-block">
-            <label>Título Principal do Álbum</label>
-            <input id="retro-title" type="text" placeholder="Nossa História de Amor">
-          </div>
-          <div class="input-block">
-            <label>Subtítulo / Nome do Casal</label>
-            <input id="retro-author" type="text" placeholder="Ex: Arthur & Bella">
-          </div>
-          <div class="input-block">
-            <label>🎵 URL da Música de Fundo (MP3 Direto)</label>
-            <input id="retro-music" type="text" placeholder="https://site.com/sua-musica.mp3">
-          </div>
-          <div class="input-block">
-            <label>📅 Data de Início do Relacionamento</label>
-            <input id="retro-date" type="date">
-          </div>
+          <div class="input-block"><label>Título Principal do Álbum</label><input id="retro-title" type="text"></div>
+          <div class="input-block"><label>Subtítulo / Nome do Casal</label><input id="retro-author" type="text"></div>
+          <div class="input-block"><label>🎵 URL da Música (MP3 Direto)</label><input id="retro-music" type="text"></div>
+          <div class="input-block"><label>📅 Data de Início</label><input id="retro-date" type="date"></div>
         </div>
-
-        <div class="input-block" style="margin-top:16px;">
-          <label>✉️ Mensagem Gravada para o Final da Retrospectiva</label>
-          <textarea id="retro-message" placeholder="Escreva aqui o texto emocionante que aparecerá no último slide da retrospectiva..."></textarea>
-        </div>
-
+        <div class="input-block" style="margin-top:16px;"><label>✉️ Mensagem Final</label><textarea id="retro-message"></textarea></div>
         <button class="spotify-btn" onclick="saveAllSettings()" style="margin-top:20px; background:white; color:black;">Salvar Dados do Perfil</button>
       </div>
     </div>
@@ -230,77 +169,46 @@
 <div id="player-screen" class="screen hidden">
   <div class="player-container">
     <div class="story-progress-container" id="story-progress-wrap"></div>
-
     <div class="player-header">
       <svg width="24" height="24" fill="white" viewBox="0 0 24 24" onclick="exitPlayer()" style="cursor:pointer;"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
-      <div class="context-title" id="context-title">EU TE AMOOOO</div>
+      <div class="context-title">NOSSA HISTÓRIA</div>
       <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
     </div>
- 
     <div class="center-content-box">
-      <img id="album-art" class="spotify-art" src="" alt="Momento">
-
+      <img id="album-art" class="spotify-art" src="">
       <div class="wrapped-counter-widget" id="counter-widget" style="display:none;">
         <div class="counter-badge">Nosso tempo</div>
         <div class="counter-big-text" id="counter-days-count">0 Dias</div>
-        <div class="counter-sub" id="counter-breakdown">Conectados de corpo e alma a cada segundo.</div>
+        <div class="counter-sub" id="counter-breakdown">Conectados de corpo e alma.</div>
       </div>
-
       <div class="wrapped-message-widget" id="message-widget" style="display:none;">
         <div>
           <div class="wrapped-badge" style="background:var(--wrapped-yellow)">Sua Mensagem Final</div>
-          <div class="msg-bubble" id="final-msg-text">Nenhuma mensagem deixada para este perfil.</div>
-        </div>
-        <div class="leave-msg-box">
-          <input id="guest-reply" type="text" placeholder="Deixe uma resposta ou reação...">
-          <button onclick="sendGuestReply()">Enviar Mensagem</button>
+          <div class="msg-bubble" id="final-msg-text"></div>
         </div>
       </div>
     </div>
- 
     <div class="meta-container">
       <div class="meta-text">
-        <div class="meta-title" id="track-title">Carregando momentos...</div>
+        <div class="meta-title" id="track-title">Carregando...</div>
         <div class="meta-author" id="track-author">Seu Álbum</div>
       </div>
-      <svg width="24" height="24" fill="var(--spotify-green)" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
     </div>
- 
     <div class="spotify-progress-wrapper">
-      <div class="spotify-track-line" onclick="scrubProgress(event)">
-        <div class="spotify-track-fill" id="track-fill"></div>
-      </div>
-      <div class="spotify-time-labels">
-        <span id="time-cur">0:00</span>
-        <span id="time-total">0:05</span>
-      </div>
+      <div class="spotify-track-line" onclick="scrubProgress(event)"><div class="spotify-track-fill" id="track-fill"></div></div>
+      <div class="spotify-time-labels"><span id="time-cur">0:00</span><span id="time-total">0:06</span></div>
     </div>
- 
     <div class="spotify-controls-row">
-      <button class="icon-btn" id="shuffle-btn" onclick="toggleShuffle()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
-      </button>
-      <button class="icon-btn" onclick="prevPhoto()">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-      </button>
-      <button class="master-play-btn" onclick="togglePlay()">
-        <g id="play-btn-svg-content">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </g>
-      </button>
-      <button class="icon-btn" onclick="nextPhoto()">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M18 6h-2v12h2zM5 18l11-6L5 6v12z"/></svg>
-      </button>
-      <button class="icon-btn" id="repeat-btn" onclick="toggleRepeat()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v3h12v-6h-2v4z"/></svg>
-      </button>
+      <button class="icon-btn" id="shuffle-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
+      <button class="icon-btn" onclick="prevPhoto()"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+      <button class="master-play-btn" onclick="togglePlay()"><g id="play-btn-svg-content"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></g></button>
+      <button class="icon-btn" onclick="nextPhoto()"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M18 6h-2v12h2zM5 18l11-6L5 6v12z"/></svg></button>
+      <button class="icon-btn" id="repeat-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v3h12v-6h-2v4z"/></svg></button>
     </div>
-
   </div>
 </div>
  
 <script>
-// ─── CONFIGURAÇÃO SUPABASE ───────────────────────────────────────────────────
 const SUPABASE_URL = 'https://eromoiokvtnienjojson.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyb21vaW9rdnRuaWVuam9qc29uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NTQwMDQsImV4cCI6MjA5NjUzMDAwNH0.iqETV9HYsQx17GQ1BCo1Ui9-YKNJjZg3cnXtfN2hNOY';
  
@@ -312,7 +220,6 @@ async function sb(path, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
  
-// ─── ESTADO GLOBAL DO SCRIPT ─────────────────────────────────────────────────
 const DEFAULT_SETTINGS = { title: 'Nosso Wrapped', author: 'Memórias de Nós Dois', music: '', date: '2025-01-01', message: '', admin_password: 'admin123' };
 let baseSettings = { ...DEFAULT_SETTINGS };
 let inviteSettings = {};
@@ -322,23 +229,18 @@ let invites = [];
 let activeInvite = null;
 let currentIndex = 0;
 let isPlaying = false;
-let isShuffle = false;
-let isRepeat = false;
 let progressInterval = null;
 let progressSec = 0;
 const slideDuration = 6; 
-
 const bgMusic = document.getElementById('bg-music');
  
-// ─── BOOTSTRAP / INICIALIZAÇÃO ────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     await loadSettings();
     await loadInvites();
     switchScreen('invite-screen');
   } catch (e) {
-    document.getElementById('loading-msg').textContent = 'Falha ao conectar no Supabase.';
-    console.error(e);
+    document.getElementById('loading-msg').textContent = 'Erro de inicialização.';
   }
 });
  
@@ -369,118 +271,74 @@ function applySettings() {
   }
 }
  
-async function loadInvites() {
-  invites = await sb('invites?select=*') || [];
-}
-
+async function loadInvites() { invites = await sb('invites?select=*') || []; }
 async function loadPhotos() {
   if (!activeInvite) return;
   const allPhotos = await sb('photos?select=*&order=position.asc,created_at.asc') || [];
-  photos = allPhotos.filter(p => p.invite_code === activeInvite.code || !p.invite_code);
+  photos = allPhotos.filter(p => p.invite_code === activeInvite.code);
 }
  
 function switchScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
 }
-
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-// ─── LOGIN DO CONVIDADO ──────────────────────────────────────────────────────
 async function tryEnter() {
   const code = document.getElementById('code-input').value.trim().toUpperCase();
   const found = invites.find(i => i.code === code);
   if (found) {
     activeInvite = found;
-    localStorage.setItem('active_invite_code', code);
-    await loadSettings(); // Garante atualização limpa antes de carregar o player
-    applySettings();
     switchScreen('loading-screen');
+    await loadSettings();
+    applySettings();
     await loadPhotos();
-    
-    if (settings.music) { 
-      bgMusic.src = settings.music; 
-      bgMusic.load(); 
-    } else {
-      bgMusic.removeAttribute('src');
-    }
-    
+    if (settings.music) { bgMusic.src = settings.music; bgMusic.load(); } 
+    else { bgMusic.removeAttribute('src'); }
     goPlayer();
   } else {
-    document.getElementById('error-msg').textContent = "Código não encontrado no nosso Wrapped.";
+    document.getElementById('error-msg').textContent = "Código incorreto.";
   }
 }
 
-// ─── MECÂNICA DO TOCA-FITAS (PLAYER) ─────────────────────────────────────────
 function goPlayer() {
   switchScreen('player-screen');
   document.getElementById('track-author').textContent = settings.author;
-  
   if (photos.length === 0) {
-    photos = [{ src: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500', title: 'Nosso Começo', caption: 'Prontos para criar memórias' }];
+    photos = [{ src: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500', title: 'Nosso Álbum' }];
   }
-  
   initPlayer();
 }
 
-function initPlayer() {
-  currentIndex = 0;
-  isPlaying = false;
-  updatePlayButtonUI();
-  bgMusic.pause();
-  buildStoryBars();
-  showSlide(currentIndex);
-}
-
+function initPlayer() { currentIndex = 0; isPlaying = false; updatePlayButtonUI(); bgMusic.pause(); buildStoryBars(); showSlide(currentIndex); }
 function buildStoryBars() {
   const wrap = document.getElementById('story-progress-wrap');
   wrap.innerHTML = '';
   const totalSlides = photos.length + 2; 
-  for(let i=0; i < totalSlides; i++) {
-    wrap.innerHTML += `<div class="story-bar-bg"><div class="story-bar-fill" id="story-fill-${i}"></div></div>`;
-  }
+  for(let i=0; i < totalSlides; i++) { wrap.innerHTML += `<div class="story-bar-bg"><div class="story-bar-fill" id="story-fill-${i}"></div></div>`; }
 }
 
 function calculateRelationshipTime(startDateStr) {
   if(!startDateStr) return { days: 0, text: 'Nenhuma data registrada' };
-  // Correção de fuso horário: Força o navegador a interpretar a string localmente ao invés de UTC
   const start = new Date(startDateStr + 'T00:00:00');
   const now = new Date();
-  
-  const diffTime = Math.abs(now - start);
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
+  const diffDays = Math.floor(Math.abs(now - start) / (1000 * 60 * 60 * 24));
   let years = now.getFullYear() - start.getFullYear();
   let months = now.getMonth() - start.getMonth();
-  if (months < 0 || (months === 0 && now.getDate() < start.getDate())) {
-    years--;
-    months += 12;
-  }
-  
+  if (months < 0 || (months === 0 && now.getDate() < start.getDate())) { years--; months += 12; }
   let daysText = now.getDate() - start.getDate();
-  if (daysText < 0) {
-    const previousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-    daysText += previousMonth.getDate();
-  }
-
-  return {
-    days: diffDays,
-    text: `${years} Anos, ${months} Meses e ${daysText} Dias juntos.`
-  };
+  if (daysText < 0) { daysText += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+  return { days: diffDays, text: `${years} Anos, ${months} Meses e ${daysText} Dias juntos.` };
 }
 
 function showSlide(idx) {
   const totalSlides = photos.length + 2;
-  
   if(idx < 0) { currentIndex = 0; return; }
-  if(idx >= totalSlides) {
-    if(isRepeat) { currentIndex = 0; initPlayer(); return; }
-    else { currentIndex = totalSlides - 1; pauseSystem(); return; }
-  }
+  if(idx >= totalSlides) { currentIndex = totalSlides - 1; pauseSystem(); return; }
 
   document.getElementById('counter-widget').style.display = 'none';
   document.getElementById('message-widget').style.display = 'none';
@@ -496,185 +354,109 @@ function showSlide(idx) {
     const timeData = calculateRelationshipTime(settings.date);
     document.getElementById('counter-days-count').textContent = `${timeData.days} Dias`;
     document.getElementById('counter-breakdown').textContent = timeData.text;
-    document.getElementById('track-title').textContent = `Sua música mais ouvida: ${settings.title}`;
+    document.getElementById('track-title').textContent = settings.title;
   } 
   else if (idx === totalSlides - 1) {
     document.getElementById('message-widget').style.display = 'flex';
-    document.getElementById('final-msg-text').textContent = settings.message || "Uma lembrancinha simples mas feita com muito carinho espero que goste, lembrar dos nossos momentos é sempre maravilhoso. EU TE AMO MUITO !!!Com carinho o pinguinzinho !!!! <3";
-    document.getElementById('track-title').textContent = "Seu álbum finalizou!";
+    document.getElementById('final-msg-text').textContent = settings.message || "Fim da retrospectiva!";
+    document.getElementById('track-title').textContent = "Fim!";
   } 
   else {
-    const photoIdx = idx - 1;
-    const photo = photos[photoIdx];
+    const photo = photos[idx - 1];
     document.getElementById('album-art').src = photo.src;
-    document.getElementById('track-title').textContent = photo.title || `Faixa ${photoIdx + 1}`;
+    document.getElementById('track-title').textContent = `Momento número ${idx}`;
   }
-
   progressSec = 0;
-  updateTimelineMetrics();
-}
-
-function updateTimelineMetrics() {
   document.getElementById('time-total').textContent = `0:${String(slideDuration).padStart(2, '0')}`;
-  document.getElementById('track-fill').style.width = '0%';
 }
 
 function togglePlay() {
-  if(isPlaying) { 
-    pauseSystem(); 
-  } else {
+  if(isPlaying) { pauseSystem(); } 
+  else {
     isPlaying = true;
-    if(settings.music) { 
-      bgMusic.play().catch((err) => console.log("O navegador bloqueou a reprodução automática.", err)); 
-    }
+    if(settings.music) { bgMusic.play().catch(e => console.log(e)); }
     updatePlayButtonUI();
-    
     clearInterval(progressInterval);
     progressInterval = setInterval(() => {
       progressSec += 0.05;
       const pct = (progressSec / slideDuration) * 100;
-      
-      const currentBar = document.getElementById(`story-fill-${currentIndex}`);
-      if(currentBar) currentBar.style.width = `${pct}%`;
+      const cb = document.getElementById(`story-fill-${currentIndex}`);
+      if(cb) cb.style.width = `${pct}%`;
       document.getElementById('track-fill').style.width = `${pct}%`;
       document.getElementById('time-cur').textContent = `0:${String(Math.floor(progressSec)).padStart(2, '0')}`;
-
-      if(progressSec >= slideDuration) {
-        currentIndex++;
-        showSlide(currentIndex);
-      }
+      if(progressSec >= slideDuration) { currentIndex++; showSlide(currentIndex); }
     }, 50);
   }
 }
-
-function pauseSystem() {
-  isPlaying = false;
-  bgMusic.pause();
-  clearInterval(progressInterval);
-  updatePlayButtonUI();
-}
-
+function pauseSystem() { isPlaying = false; bgMusic.pause(); clearInterval(progressInterval); updatePlayButtonUI(); }
 function updatePlayButtonUI() {
-  const container = document.getElementById('play-btn-svg-content');
-  if(isPlaying) {
-    container.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
-  } else {
-    container.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
-  }
+  document.getElementById('play-btn-svg-content').innerHTML = isPlaying ? 
+    `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>` : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
 }
-
 function nextPhoto() { currentIndex++; showSlide(currentIndex); }
 function prevPhoto() { currentIndex--; showSlide(currentIndex); }
-function toggleShuffle() { isShuffle = !isShuffle; document.getElementById('shuffle-btn').classList.toggle('active', isShuffle); }
-function toggleRepeat() { isRepeat = !isRepeat; document.getElementById('repeat-btn').classList.toggle('active', isRepeat); }
-function scrubProgress(e) { if(!isPlaying) return; const rect = e.currentTarget.getBoundingClientRect(); const pct = (e.clientX - rect.left) / rect.width; progressSec = pct * slideDuration; }
 function exitPlayer() { pauseSystem(); switchScreen('invite-screen'); }
 
-async function sendGuestReply() {
-  const reply = document.getElementById('guest-reply').value.trim();
-  if(!reply) return;
-  toast("Mensagem enviada com carinho!");
-  document.getElementById('guest-reply').value = '';
-}
-
-// ─── SEÇÃO ADMIN CONTROLADORA (CORRIGIDA) ───────────────────────────────────
 function promptAdmin() {
-  const pass = prompt("Insira a chave mestra de Admin:");
-  if (pass === baseSettings.admin_password) {
-    switchScreen('admin-screen');
-    renderInvitesList();
-  } else if(pass !== null) alert("Acesso negado.");
+  const pass = prompt("Senha Master Admin:");
+  if (pass === baseSettings.admin_password) { switchScreen('admin-screen'); renderInvitesList(); }
 }
-
-async function renderInvitesList() {
+function renderInvitesList() {
   const list = document.getElementById('invite-list');
-  if (!list) return;
-  list.innerHTML = '';
+  if (!list) return; list.innerHTML = '';
   invites.forEach(inv => {
-    list.innerHTML += `
-      <li class="invite-item" onclick="selectProfile('${inv.code}')">
-        <div><span class="invite-code">[${inv.code}]</span> — ${inv.name}</div>
-        <button class="btn-delete" onclick="event.stopPropagation(); deleteProfile('${inv.id}')">Excluir</button>
-      </li>`;
+    list.innerHTML += `<li class="invite-item" onclick="selectProfile('${inv.code}')">
+      <div><span class="invite-code">[${inv.code}]</span> — ${inv.name}</div>
+      <button class="btn-delete" onclick="event.stopPropagation(); deleteProfile('${inv.id}')">Excluir</button>
+    </li>`;
   });
 }
-
 async function addInvite() {
   const code = document.getElementById('new-code-input').value.trim().toUpperCase();
   const name = document.getElementById('new-name-input').value.trim();
-  if(!code || !name) return alert("Preencha todos os campos.");
-  
+  if(!code || !name) return;
   await sb('invites', { method: 'POST', body: { code, name } });
-  document.getElementById('new-code-input').value = '';
-  document.getElementById('new-name-input').value = '';
-  toast("Perfil adicionado!");
-  await loadInvites();
-  renderInvitesList();
+  toast("Perfil Adicionado!"); await loadInvites(); renderInvitesList();
 }
-
 async function deleteProfile(id) {
-  if(!confirm("Tem certeza que deseja excluir permanentemente este perfil de convidado?")) return;
+  if(!confirm("Deletar perfil?")) return;
   await sb(`invites?id=eq.${id}`, { method: 'DELETE' });
-  toast("Perfil removido!");
-  await loadInvites();
-  renderInvitesList();
+  toast("Removido!"); await loadInvites(); renderInvitesList();
 }
-
 async function selectProfile(code) {
   activeInvite = invites.find(i => i.code === code);
   applySettings();
   document.getElementById('active-invite-msg').innerHTML = `Perfil Ativo: <b style="color:var(--spotify-green)">${activeInvite.name}</b>`;
-  
   document.getElementById('retro-title').value = settings.title || '';
   document.getElementById('retro-author').value = settings.author || '';
   document.getElementById('retro-music').value = settings.music || '';
   document.getElementById('retro-date').value = settings.date || '';
   document.getElementById('retro-message').value = settings.message || '';
-  
-  await loadPhotos();
-  renderPhotosGrid();
+  await loadPhotos(); renderPhotosGrid();
 }
-
 function renderPhotosGrid() {
-  const grid = document.getElementById('photo-grid');
-  if(!grid) return;
-  grid.innerHTML = '';
+  const grid = document.getElementById('photo-grid'); grid.innerHTML = '';
   photos.forEach(p => {
-    grid.innerHTML += `
-      <div class="photo-thumb-wrap">
-        <img src="${p.src}">
-        <div class="photo-thumb-overlay">
-          <button onclick="deletePhoto('${p.id}')">Apagar</button>
-        </div>
-      </div>`;
+    grid.innerHTML += `<div class="photo-thumb-wrap"><img src="${p.src}"><div class="photo-thumb-overlay"><button onclick="deletePhoto('${p.id}')">Apagar</button></div></div>`;
   });
 }
-
 async function handleFiles(files) {
-  if(!activeInvite) return alert("Selecione um perfil ativo antes de enviar fotos.");
+  if(!activeInvite) return alert("Selecione um perfil.");
   for(let file of files) {
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const base64Src = e.target.result;
-      await sb('photos', { method: 'POST', body: { src: base64Src, invite_code: activeInvite.code, position: photos.length } });
-      await loadPhotos();
-      renderPhotosGrid();
+      await sb('photos', { method: 'POST', body: { src: e.target.result, invite_code: activeInvite.code, position: photos.length } });
+      await loadPhotos(); renderPhotosGrid();
     };
     reader.readAsDataURL(file);
   }
-  toast("Imagens carregadas!");
 }
-
 async function deletePhoto(id) {
-  if(!confirm("Deseja remover essa imagem da retrospectiva?")) return;
   await sb(`photos?id=eq.${id}`, { method: 'DELETE' });
-  toast("Foto removida.");
-  await loadPhotos();
-  renderPhotosGrid();
+  await loadPhotos(); renderPhotosGrid();
 }
-
 async function saveAllSettings() {
-  if(!activeInvite) return alert("Nenhum perfil ativo selecionado.");
+  if(!activeInvite) return;
   const payload = [
     { key: `invite:${activeInvite.code}:title`, value: document.getElementById('retro-title').value },
     { key: `invite:${activeInvite.code}:author`, value: document.getElementById('retro-author').value },
@@ -682,18 +464,10 @@ async function saveAllSettings() {
     { key: `invite:${activeInvite.code}:date`, value: document.getElementById('retro-date').value },
     { key: `invite:${activeInvite.code}:message`, value: document.getElementById('retro-message').value }
   ];
-
-  for(let item of payload) {
-    await sb('settings', { method: 'POST', prefer: 'resolution=merge', body: item });
-  }
-  toast("Dados do perfil salvos com sucesso!");
-  await loadSettings(); // Recarrega os dados do banco imediatamente
+  for(let item of payload) { await sb('settings', { method: 'POST', prefer: 'resolution=merge', body: item }); }
+  toast("Dados salvos!"); await loadSettings();
 }
-
-function logout() {
-  activeInvite = null;
-  switchScreen('invite-screen');
-}
+function logout() { activeInvite = null; switchScreen('invite-screen'); }
 </script>
 </body>
 </html>
