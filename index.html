@@ -375,7 +375,6 @@ async function loadInvites() {
 
 async function loadPhotos() {
   if (!activeInvite) return;
-  // Filtra as fotos associadas a este perfil/código específico
   const allPhotos = await sb('photos?select=*&order=position.asc,created_at.asc') || [];
   photos = allPhotos.filter(p => p.invite_code === activeInvite.code || !p.invite_code);
 }
@@ -398,6 +397,7 @@ async function tryEnter() {
   if (found) {
     activeInvite = found;
     localStorage.setItem('active_invite_code', code);
+    await loadSettings(); // Garante atualização limpa antes de carregar o player
     applySettings();
     switchScreen('loading-screen');
     await loadPhotos();
@@ -447,8 +447,10 @@ function buildStoryBars() {
 
 function calculateRelationshipTime(startDateStr) {
   if(!startDateStr) return { days: 0, text: 'Nenhuma data registrada' };
-  const start = new Date(startDateStr);
+  // Correção de fuso horário: Força o navegador a interpretar a string localmente ao invés de UTC
+  const start = new Date(startDateStr + 'T00:00:00');
   const now = new Date();
+  
   const diffTime = Math.abs(now - start);
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   
@@ -458,9 +460,16 @@ function calculateRelationshipTime(startDateStr) {
     years--;
     months += 12;
   }
+  
+  let daysText = now.getDate() - start.getDate();
+  if (daysText < 0) {
+    const previousMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    daysText += previousMonth.getDate();
+  }
+
   return {
     days: diffDays,
-    text: `${years} Anos, ${months} Meses e ${now.getDate()} Dias juntos.`
+    text: `${years} Anos, ${months} Meses e ${daysText} Dias juntos.`
   };
 }
 
@@ -516,7 +525,7 @@ function togglePlay() {
   } else {
     isPlaying = true;
     if(settings.music) { 
-      bgMusic.play().catch((err) => console.log("O navegador bloqueou a reprodução automática. Interaja com a tela primeiro. Detalhes:", err)); 
+      bgMusic.play().catch((err) => console.log("O navegador bloqueou a reprodução automática.", err)); 
     }
     updatePlayButtonUI();
     
@@ -628,6 +637,7 @@ async function selectProfile(code) {
 
 function renderPhotosGrid() {
   const grid = document.getElementById('photo-grid');
+  if(!grid) return;
   grid.innerHTML = '';
   photos.forEach(p => {
     grid.innerHTML += `
@@ -677,7 +687,7 @@ async function saveAllSettings() {
     await sb('settings', { method: 'POST', prefer: 'resolution=merge', body: item });
   }
   toast("Dados do perfil salvos com sucesso!");
-  await loadSettings();
+  await loadSettings(); // Recarrega os dados do banco imediatamente
 }
 
 function logout() {
