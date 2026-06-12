@@ -444,7 +444,7 @@ function exitPlayer() { pause(); clearInterval(cntInterval); switchScreen('invit
 function promptAdmin() {
   const p = prompt('Senha Admin:');
   if (p === baseSettings.admin_password) { switchScreen('admin-screen'); renderInvites(); }
-  else if (p !== null) alert('Senha incorreta.');
+  else if (p !== null) alert('Senha incorrecta.');
 }
  
 function renderInvites() {
@@ -521,10 +521,10 @@ function renderPhotosGrid() {
       if (!dragSrc || dragSrc === wrap) return;
       const fromIdx = parseInt(dragSrc.dataset.idx);
       const toIdx   = parseInt(wrap.dataset.idx);
-      const moved = photos.splice(fromIdx, 1)[0];
+      const [moved] = photos.splice(fromIdx, 1);
       photos.splice(toIdx, 0, moved);
-      await savePhotoOrder();
       renderPhotosGrid();
+      await savePhotoOrder();
     });
  
     grid.appendChild(wrap);
@@ -532,10 +532,22 @@ function renderPhotosGrid() {
 }
  
 async function savePhotoOrder() {
-  for (let i=0; i<photos.length; i++) {
-    await sb(`photos?id=eq.${photos[i].id}`, { method:'PATCH', prefer:'return=minimal', body:{ position: i } });
+  if (!photos || !photos.length) return;
+  photos.forEach((photo, index) => { photo.position = index; });
+  try {
+    const promises = photos.map(photo => 
+      sb(`photos?id=eq.${photo.id}`, { 
+        method: 'PATCH', 
+        prefer: 'return=minimal', 
+        body: { position: photo.position } 
+      })
+    );
+    await Promise.all(promises);
+    toast('Ordem salva!');
+  } catch(err) {
+    console.error(err);
+    toast('Erro ao sincronizar ordem.', '#ff4b91');
   }
-  toast('Ordem salva!');
 }
  
 function triggerUpload() {
@@ -592,7 +604,6 @@ async function saveAllSettings() {
   if(!activeInvite) return;
   const code = activeInvite.code;
   
-  // Array de chaves e valores a serem atualizados ou inseridos
   const settingsToSave = [
     { key: `invite:${code}:title`, value: document.getElementById('f-title').value },
     { key: `invite:${code}:author`, value: document.getElementById('f-author').value },
@@ -601,17 +612,24 @@ async function saveAllSettings() {
     { key: `invite:${code}:message`, value: document.getElementById('f-message').value }
   ];
 
-  for (const item of settingsToSave) {
-    // Tenta atualizar ou inserir cada configuração usando a estratégia upsert no Supabase
-    await sb('settings', {
-      method: 'POST',
-      prefer: 'resolution=merge-duplicates',
-      body: item
-    });
+  try {
+    for (const item of settingsToSave) {
+      await sb(`settings?key=eq.${item.key}`, { method: 'DELETE' });
+    }
+    
+    for (const item of settingsToSave) {
+      await sb('settings', {
+        method: 'POST',
+        body: item
+      });
+    }
+    
+    toast('Configurações salvas com sucesso!');
+    await loadSettings();
+  } catch (err) {
+    console.error(err);
+    toast('Erro ao salvar as configurações.', '#ff4b91');
   }
-  
-  toast('Configurações salvas!');
-  await loadSettings();
 }
 </script>
 </body>
