@@ -303,7 +303,8 @@ async function loadPhotos() {
 // ── SCREENS ──
 function switchScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
 function toast(msg, bg) { const t=document.getElementById('toast'); t.style.background=bg||'var(--blue)'; t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
- 
+function logout() { activeInvite = null; switchScreen('invite-screen'); }
+
 // ── INVITE FLOW ──
 async function tryEnter() {
   const code = document.getElementById('code-input').value.trim().toUpperCase();
@@ -320,7 +321,6 @@ async function tryEnter() {
 // ── PLAYER ──
 function goPlayer() {
   switchScreen('player-screen');
-  // Se o usuário entrar pela visualização do Admin sem fotos salvas, exibe imagem demo
   if (!photos.length) photos = [{ id:'_demo', src:'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600', invite_code:'', position:0 }];
   curIdx = 0; playing = false;
   updatePlayBtn();
@@ -359,7 +359,7 @@ function refreshCounter() {
   document.getElementById('cnt-sub').textContent = t.text;
 }
  
-// ── SHOW SLIDE ── (Ajustada a exibição e opacidade correta das fotos)
+// ── SHOW SLIDE ──
 function showSlide(idx) {
   const total = photos.length + 2;
   if (idx < 0) { curIdx = 0; return; }
@@ -375,17 +375,14 @@ function showSlide(idx) {
   message.classList.remove('on');
   artEl.style.opacity = '0';
  
-  // Atualiza barras superiores do story
   for (let i=0; i<total; i++) { const b=document.getElementById(`b${i}`); if(b) b.style.width = i<idx?'100%':'0%'; }
  
-  // Reset barra inferior de progresso do player
   progSec = 0;
   document.getElementById('t-tot').textContent = `0:${String(SLIDE_DUR).padStart(2,'0')}`;
   document.getElementById('t-cur').textContent = '0:00';
   document.getElementById('prog-fill').style.width = '0%';
  
   if (idx === 0) {
-    // Slide inicial (Tempo de namoro)
     document.getElementById('player-bg').style.backgroundImage = '';
     document.getElementById('player-bg').style.background = 'linear-gradient(155deg,#c4005c,#4a0e4e)';
     counter.classList.add('on');
@@ -395,7 +392,6 @@ function showSlide(idx) {
     document.getElementById('p-author').textContent = settings.author || '';
  
   } else if (idx === total-1) {
-    // Slide final (Mensagem de Amor)
     document.getElementById('player-bg').style.backgroundImage = '';
     document.getElementById('player-bg').style.background = 'linear-gradient(145deg,#003d61,#c45000)';
     message.classList.add('on');
@@ -404,13 +400,12 @@ function showSlide(idx) {
     document.getElementById('p-author').textContent = settings.author || '';
  
   } else {
-    // Slide de Foto ativa
     const photo = photos[idx - 1];
     const bg = document.getElementById('player-bg');
     bg.style.background = '';
  
     artEl.src = photo.src;
-    artEl.style.opacity = '1'; // Torna visível imediatamente
+    artEl.style.opacity = '1';
     bg.style.backgroundImage = `url('${photo.src}')`;
  
     document.getElementById('p-title').textContent = `Memória ${idx}`;
@@ -512,7 +507,6 @@ function renderPhotosGrid() {
       <div class="photo-num">${i+1}</div>
       <div class="photo-overlay"><button onclick="deletePhoto('${p.id}')">Apagar</button></div>`;
  
-    // Drag events
     wrap.addEventListener('dragstart', e => {
       dragSrc = wrap;
       wrap.classList.add('dragging');
@@ -596,17 +590,29 @@ async function deletePhoto(id) {
  
 async function saveAllSettings() {
   if(!activeInvite) return;
-  const payload = [
-    { key: `invite:${activeInvite.code}:title`, value: document.getElementById('f-title').value },
-    { key: `invite:${activeInvite.code}:author`, value: document.getElementById('f-author').value },
-    { key: `invite:${activeInvite.code}:music`, value: document.getElementById('f-music').value },
-    { key: `invite:${activeInvite.code}:date`, value: document.getElementById('f-date').value },
-    { key: `invite:${activeInvite.code}:message`, value: document.getElementById('f-message').value }
+  const code = activeInvite.code;
+  
+  // Array de chaves e valores a serem atualizados ou inseridos
+  const settingsToSave = [
+    { key: `invite:${code}:title`, value: document.getElementById('f-title').value },
+    { key: `invite:${code}:author`, value: document.getElementById('f-author').value },
+    { key: `invite:${code}:music`, value: document.getElementById('f-music').value },
+    { key: `invite:${code}:date`, value: document.getElementById('f-date').value },
+    { key: `invite:${code}:message`, value: document.getElementById('f-message').value }
   ];
-  for(let item of payload) { await sb('settings', { method: 'POST', prefer: 'resolution=merge', body: item }); }
-  toast("Dados salvos!"); await loadSettings();
+
+  for (const item of settingsToSave) {
+    // Tenta atualizar ou inserir cada configuração usando a estratégia upsert no Supabase
+    await sb('settings', {
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates',
+      body: item
+    });
+  }
+  
+  toast('Configurações salvas!');
+  await loadSettings();
 }
-function logout() { activeInvite = null; switchScreen('invite-screen'); }
 </script>
 </body>
 </html>
