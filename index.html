@@ -3,634 +3,1210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Retrospectiva</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=700;800;900&family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Retrô — Nossa História</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #121212; --surface: #181818; --surface2: #282828;
-  --green: #1DB954; --green2: #1ed760;
-  --border: rgba(255,255,255,0.1); --text: #fff; --text2: #b3b3b3;
-  --pink: #ff4b91; --yellow: #ffcd38; --orange: #ff763b; --blue: #1d75ff;
-}
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
-h1,h2,h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: -0.03em; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --surface2: #1e1e1e; --surface3: #2a2a2a;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+    --gold: #F5A623; --gold-glow: rgba(245,166,35,0.15);
+    --text: #f0ede8; --text2: #9e9993; --text3: #6b6660;
+    --radius: 12px; --radius-lg: 20px;
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
  
-/* ── SCREENS ── */
-.screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity .5s, transform .5s; z-index: 10; }
-.screen.hidden { opacity: 0; pointer-events: none; transform: scale(1.03) translateY(16px); }
+  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease, transform 0.5s ease; }
+  .screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.97); }
  
-/* ── LOADING ── */
-#loading-screen { background:#000; flex-direction:column; gap:20px; }
-.loader { width:48px;height:48px;border:4px solid var(--surface2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite; }
-@keyframes spin { to { transform:rotate(360deg); } }
+  #loading-screen { background: var(--bg); flex-direction: column; gap: 16px; }
+  .loading-logo { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--gold); letter-spacing: 0.15em; }
+  .loading-bar { width: 180px; height: 2px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+  .loading-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; animation: loadpulse 1.4s ease-in-out infinite; }
+  @keyframes loadpulse { 0%,100%{width:0%;margin-left:0} 50%{width:80%;margin-left:10%} }
+  .loading-msg { font-size: 13px; color: var(--text3); }
  
-/* ── TOAST ── */
-#toast { position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--blue);border-radius:6px;padding:10px 22px;font-size:13px;font-weight:700;color:#fff;opacity:0;transition:all .3s;pointer-events:none;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.5); }
-#toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
+  #toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 10px 20px; font-size: 13px; color: var(--text); opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
  
-/* ── INVITE ── */
-#invite-screen { background:linear-gradient(135deg,#1e0034,#000); flex-direction:column; }
-.invite-card { text-align:center;width:420px;max-width:90vw;padding:20px; }
-.badge { display:inline-block;background:var(--green);color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:900;text-transform:uppercase;padding:4px 10px;border-radius:4px;margin-bottom:14px;letter-spacing:.1em; }
-.invite-title { font-size:40px;line-height:1.1;margin-bottom:14px;text-transform:uppercase;color:var(--yellow); }
-.invite-sub { font-size:15px;color:var(--text2);margin-bottom:28px;line-height:1.5; }
-.round-input { width:100%;background:var(--surface2);border:2px solid transparent;border-radius:50px;padding:15px 22px;font-size:15px;font-weight:600;color:#fff;text-align:center;outline:none;transition:all .2s;margin-bottom:14px; }
-.round-input:focus { border-color:#fff;background:#333; }
-.btn-green { width:100%;background:var(--green);border:none;border-radius:50px;padding:15px;font-size:15px;font-weight:700;color:#000;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.05em; }
-.btn-green:hover { background:var(--green2);transform:scale(1.02); }
+  #invite-screen { background: var(--bg); flex-direction: column; }
+  .invite-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(245,166,35,0.06) 0%, transparent 70%); pointer-events: none; }
+  .invite-card { position: relative; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 52px 48px; width: 420px; max-width: 92vw; text-align: center; }
+  .invite-logo { font-family: 'Playfair Display', serif; font-size: 13px; letter-spacing: 0.35em; color: var(--gold); text-transform: uppercase; margin-bottom: 36px; }
+  .invite-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 400; line-height: 1.3; margin-bottom: 10px; }
+  .invite-subtitle { font-size: 14px; color: var(--text2); margin-bottom: 36px; line-height: 1.6; }
+  .invite-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 14px 18px; font-family: 'Inter', sans-serif; font-size: 16px; color: var(--text); letter-spacing: 0.12em; text-align: center; outline: none; transition: border-color 0.2s; margin-bottom: 14px; }
+  .invite-input::placeholder { color: var(--text3); letter-spacing: 0; }
+  .invite-input:focus { border-color: var(--gold); }
+  .invite-input.error { border-color: #e24b4a; animation: shake 0.35s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+  .invite-btn { width: 100%; background: var(--gold); border: none; border-radius: 10px; padding: 14px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; color: #1a0e00; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+  .invite-btn:hover { background: #f0b040; }
+  .invite-btn:active { transform: scale(0.98); }
+  .invite-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .invite-error { font-size: 13px; color: #e24b4a; margin-top: 10px; min-height: 18px; }
+  .invite-divider { border: none; border-top: 1px solid var(--border); margin: 32px 0 20px; }
+  .invite-footer { font-size: 12px; color: var(--text3); line-height: 1.6; }
  
-/* ── ADMIN ── */
-#admin-screen { background:var(--bg);align-items:flex-start;overflow-y:auto; }
-.admin-wrap { width:860px;max-width:96vw;padding:36px 20px;margin:0 auto; }
-.admin-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;border-bottom:1px solid var(--border);padding-bottom:18px; }
-.admin-logo { font-size:22px; } .admin-logo span { color:var(--green); }
-.sec { margin-bottom:36px; }
-.sec-title { font-size:17px;color:#fff;margin-bottom:14px;border-left:4px solid var(--green);padding-left:10px; }
-.card { background:var(--surface);border-radius:12px;padding:22px; }
-.invite-list { list-style:none;display:flex;flex-direction:column;gap:8px; }
-.invite-item { display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:var(--surface2);border-radius:8px;cursor:pointer;transition:background .15s; }
-.invite-item:hover,.invite-item.selected { background:#333; }
-.invite-item.selected { border-left:3px solid var(--green); }
-.inv-code { font-weight:700;color:var(--green); }
-.btn-del { background:none;border:none;color:#ff5555;cursor:pointer;font-size:13px;font-weight:700; }
-.row { display:flex;gap:10px;margin-top:14px;flex-wrap:wrap; }
-.row input,.card input[type=text],.card input[type=date] { flex:1;min-width:140px;background:var(--surface2);border:1px solid transparent;border-radius:6px;padding:11px;color:#fff;outline:none;font-family:inherit;font-size:14px; }
-.cfg-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
-@media(max-width:580px){ .cfg-grid { grid-template-columns:1fr; } }
-.iblk { display:flex;flex-direction:column;gap:5px; }
-.iblk label { font-size:12px;color:var(--text2);font-weight:600; }
-.card textarea { background:var(--surface2);border:none;border-radius:6px;padding:11px;color:#fff;height:76px;resize:none;font-family:inherit;outline:none;width:100%;font-size:14px; }
+  #admin-screen { background: var(--bg); align-items: flex-start; overflow-y: auto; }
+  .admin-wrap { width: 820px; max-width: 96vw; padding: 48px 24px; margin: 0 auto; }
+  .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; flex-wrap: wrap; gap: 12px; }
+  .admin-logo { font-family: 'Playfair Display', serif; font-size: 22px; }
+  .admin-logo span { color: var(--gold); }
+  .admin-badge { background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: var(--gold); font-weight: 500; }
+  .admin-section { margin-bottom: 36px; }
+  .admin-section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 16px; }
+  .admin-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 12px; }
+  .invite-list { list-style: none; }
+  .invite-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 8px; }
+  .invite-item:last-child { border-bottom: none; }
+  .invite-code { font-family: monospace; font-size: 15px; font-weight: 500; letter-spacing: 0.12em; color: var(--gold); flex-shrink: 0; }
+  .invite-name { font-size: 14px; color: var(--text2); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .invite-status { font-size: 12px; padding: 3px 10px; border-radius: 20px; flex-shrink: 0; }
+  .invite-status.used { background: rgba(30,200,100,0.1); color: #3dd68c; }
+  .invite-status.unused { background: var(--surface2); color: var(--text3); }
+  .btn-delete { background: none; border: none; color: var(--text3); cursor: pointer; padding: 4px 8px; border-radius: 6px; font-size: 14px; transition: color 0.2s; flex-shrink: 0; }
+  .btn-delete:hover { color: #e24b4a; }
+  .add-invite-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .add-invite-row input { flex: 1; min-width: 120px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 14px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text); outline: none; }
+  .add-invite-row input::placeholder { color: var(--text3); }
+  .add-invite-row input:focus { border-color: var(--gold); }
+  .btn-add { background: var(--gold); border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 600; color: #1a0e00; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+  .btn-add:hover { background: #f0b040; }
+  .btn-add:disabled { opacity: 0.6; cursor: not-allowed; }
+  .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .photo-thumb-wrap { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; }
+  .photo-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s; }
+  .photo-thumb-wrap:hover img { transform: scale(1.05); }
+  .photo-thumb-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.65); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; opacity: 0; transition: opacity 0.2s; }
+  .photo-thumb-wrap:hover .photo-thumb-overlay { opacity: 1; }
+  .photo-thumb-overlay button { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 11px; padding: 4px 10px; cursor: pointer; width: 80px; transition: background 0.15s; }
+  .photo-thumb-overlay button:hover { background: rgba(255,255,255,0.22); }
+  .photo-thumb-overlay button.remove-btn:hover { background: rgba(226,75,74,0.5); }
+  .upload-zone { border: 2px dashed var(--border2); border-radius: var(--radius); padding: 32px; text-align: center; color: var(--text2); font-size: 14px; cursor: pointer; transition: border-color 0.2s, background 0.2s; margin-bottom: 16px; }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--gold); background: var(--gold-glow); color: var(--gold); }
+  #file-input { display: none; }
+  .caption-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 11px; padding: 4px 8px; width: 100%; margin-top: 6px; font-family: 'Inter', sans-serif; outline: none; }
+  .caption-input:focus { border-color: var(--gold); }
+  .btn-secondary { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 18px; font-size: 14px; color: var(--text); cursor: pointer; transition: background 0.2s; font-family: 'Inter', sans-serif; }
+  .btn-secondary:hover { background: var(--surface3); }
  
-/* ── PHOTO GRID (reordenável) ── */
-.photo-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:14px; }
-.photo-thumb { position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#111;cursor:grab;border:2px solid transparent;transition:border-color .2s,transform .2s,opacity .2s; }
-.photo-thumb:active { cursor:grabbing; }
-.photo-thumb.drag-over { border-color:var(--green);transform:scale(1.05); }
-.photo-thumb.dragging { opacity:.4; }
-.photo-thumb img { width:100%;height:100%;object-fit:cover;pointer-events:none; }
-.photo-num { position:absolute;top:5px;left:6px;background:rgba(0,0,0,.75);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px; }
-.photo-overlay { position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s; }
-.photo-thumb:hover .photo-overlay { opacity:1; }
-.photo-overlay button { background:#ff4b91;border:none;color:#fff;padding:5px 11px;border-radius:4px;font-weight:700;cursor:pointer;font-size:12px; }
-.drag-hint { font-size:12px;color:var(--text2);margin-bottom:6px; }
+  #player-screen { background: var(--bg); flex-direction: column; overflow: hidden; }
+  .player-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: background-image 1.2s ease; filter: blur(80px); transform: scale(1.1); opacity: 0.22; pointer-events: none; }
+  .player-layout { position: relative; display: flex; flex-direction: column; align-items: center; height: 100vh; width: 100%; max-width: 480px; padding: 0 24px; overflow: hidden; }
+  .player-topbar { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 20px 0 14px; flex-shrink: 0; }
+  .player-brand { font-family: 'Playfair Display', serif; font-size: 13px; letter-spacing: 0.25em; color: var(--gold); text-transform: uppercase; }
+  .player-menu-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text2); font-size: 12px; padding: 6px 12px; cursor: pointer; transition: background 0.2s, color 0.2s; }
+  .player-menu-btn:hover { background: var(--surface3); color: var(--text); }
+  .album-art-wrap { width: min(320px, 82vw); aspect-ratio: 1; flex-shrink: 0; margin: 8px 0 16px; position: relative; }
+  .album-art { width: 100%; height: 100%; border-radius: 16px; object-fit: cover; display: block; box-shadow: 0 20px 60px rgba(0,0,0,0.6); transition: opacity 0.45s ease; }
+  .album-art.fade { opacity: 0; }
+  .album-placeholder { width: 100%; height: 100%; border-radius: 16px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: var(--text3); font-size: 14px; text-align: center; }
+  .photo-counter { font-size: 12px; color: var(--text3); text-align: center; margin-bottom: 4px; letter-spacing: 0.05em; flex-shrink: 0; }
+  .track-info { width: 100%; display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; flex-shrink: 0; }
+  .track-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; line-height: 1.2; max-width: 260px; }
+  .track-caption { font-size: 13px; color: var(--text2); margin-top: 4px; font-style: italic; max-width: 260px; line-height: 1.4; }
+  .heart-btn { background: none; border: none; color: var(--text3); font-size: 22px; cursor: pointer; padding: 4px; margin-top: 2px; transition: color 0.2s, transform 0.15s; flex-shrink: 0; }
+  .heart-btn:hover { color: #e24b4a; transform: scale(1.1); }
+  .heart-btn.liked { color: #e24b4a; }
+  .progress-wrap { width: 100%; flex-shrink: 0; margin-bottom: 18px; }
+  .progress-bar-track { height: 4px; background: var(--surface3); border-radius: 2px; cursor: pointer; position: relative; margin-bottom: 8px; }
+  .progress-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.1s linear; position: relative; }
+  .progress-bar-fill::after { content: ''; position: absolute; right: -6px; top: -4px; width: 12px; height: 12px; border-radius: 50%; background: var(--gold); opacity: 0; transition: opacity 0.15s; }
+  .progress-bar-track:hover .progress-bar-fill::after { opacity: 1; }
+  .progress-times { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); }
+  .controls { display: flex; align-items: center; justify-content: center; gap: 18px; width: 100%; flex-shrink: 0; margin-bottom: 18px; }
+  .ctrl-btn { background: none; border: none; color: var(--text2); cursor: pointer; padding: 8px; border-radius: 50%; transition: color 0.15s, transform 0.1s; display: flex; align-items: center; justify-content: center; }
+  .ctrl-btn:hover { color: var(--text); transform: scale(1.1); }
+  .ctrl-btn.active { color: var(--gold); }
+  .play-btn { background: var(--gold); border: none; border-radius: 50%; width: 58px; height: 58px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s, transform 0.1s; box-shadow: 0 4px 20px rgba(245,166,35,0.3); }
+  .play-btn:hover { background: #f0b040; transform: scale(1.04); }
+  .play-btn:active { transform: scale(0.97); }
+  .thumb-row { display: flex; gap: 8px; overflow-x: auto; width: 100%; padding-bottom: 8px; flex-shrink: 0; scrollbar-width: none; }
+  .thumb-row::-webkit-scrollbar { display: none; }
+  .thumb-item { flex-shrink: 0; width: 50px; height: 50px; border-radius: 8px; overflow: hidden; border: 2px solid transparent; cursor: pointer; transition: border-color 0.2s, opacity 0.2s; opacity: 0.5; }
+  .thumb-item.active { border-color: var(--gold); opacity: 1; }
+  .thumb-item:hover { opacity: 0.85; }
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .slideshow-indicator { display: flex; gap: 5px; justify-content: center; margin-bottom: 8px; flex-shrink: 0; flex-wrap: wrap; max-width: 280px; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--surface3); transition: background 0.2s, transform 0.2s; cursor: pointer; }
+  .dot.active { background: var(--gold); transform: scale(1.3); }
+  .speed-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text2); font-size: 11px; font-weight: 600; padding: 4px 8px; cursor: pointer; transition: background 0.15s, color 0.15s; }
+  .speed-btn:hover { background: var(--surface3); color: var(--text); }
+  .empty-player { text-align: center; padding: 40px 24px; }
+  .empty-player h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 400; margin-bottom: 10px; }
+  .empty-player p { font-size: 14px; color: var(--text2); line-height: 1.6; }
  
-/* ── PLAYER ── */
-#player-screen { background:#121212;flex-direction:column;padding:0;overflow:hidden; }
-#player-bg { position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(70px) brightness(.3) saturate(1.5);transform:scale(1.2);transition:background-image .6s;z-index:0; }
-.player-wrap { position:relative;z-index:1;width:100%;max-width:420px;display:flex;flex-direction:column;height:100%;justify-content:space-between;padding:18px 18px 26px; }
+  #fullscreen-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  #fullscreen-overlay.visible { opacity: 1; pointer-events: all; }
+  #fullscreen-overlay img { max-width: 95vw; max-height: 95vh; object-fit: contain; border-radius: 8px; }
+  #fullscreen-overlay .close-fs { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 40px; height: 40px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
  
-/* Story bars */
-.bars { display:flex;gap:4px;width:100%;padding:8px 0; }
-.bar-bg { flex:1;height:3px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden; }
-.bar-fill { height:100%; width:0%; background:#fff; }
- 
-.p-header { display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:4px; }
-.p-ctx { font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.6);font-weight:700; }
- 
-/* Album art box */
-.art-box { position:relative;width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8);margin:14px 0;background:#1a1a1a;flex-shrink:0; }
- 
-#album-art { width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity .45s ease;z-index:1; }
- 
-/* Widgets */
-.w-counter,.w-message {
-  position:absolute;inset:0;z-index:2;
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  padding:28px;animation:pop .35s ease;
-}
-.w-counter.on,.w-message.on { display:flex; }
-.w-counter { background:linear-gradient(155deg,#c4005c,#4a0e4e);text-align:center; }
-.w-message { background:linear-gradient(145deg,#003d61,#c45000);align-items:flex-start;justify-content:center;overflow-y:auto; }
-@keyframes pop { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
- 
-.cnt-badge { background:#fff;color:#000;font-size:11px;font-weight:900;padding:4px 12px;border-radius:20px;margin-bottom:18px;text-transform:uppercase;letter-spacing:.08em; }
-.cnt-days { font-size:54px;line-height:1;color:var(--yellow);margin-bottom:8px; }
-.cnt-sub { font-size:14px;font-weight:500;color:rgba(255,255,255,.9);line-height:1.5; }
-.msg-lbl { display:inline-block;background:var(--yellow);color:#000;font-size:11px;font-weight:900;padding:4px 10px;border-radius:4px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em; }
-.msg-bubble { background:rgba(0,0,0,.35);padding:18px;border-radius:10px;font-size:14px;font-style:italic;line-height:1.7;color:#fff;border-left:4px solid var(--yellow);width:100%; }
- 
-/* Meta */
-.meta { width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px; }
-.meta-text { display:flex;flex-direction:column;max-width:85%; }
-.meta-title { font-size:21px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.meta-author { font-size:13px;color:rgba(255,255,255,.55);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
- 
-/* Progress */
-.prog-wrap { width:100%;margin-bottom:16px; }
-.prog-track { height:4px;background:rgba(255,255,255,.18);border-radius:2px;cursor:pointer;position:relative; }
-.prog-fill { height:100%;background:#fff;width:0%;border-radius:2px; }
-.prog-times { display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.45);margin-top:5px; }
- 
-/* Controls */
-.controls { display:flex;align-items:center;justify-content:space-between;width:100%;padding:0 4px;margin-bottom:6px; }
-.ibtn { background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s; }
-.ibtn:hover { color:#fff; }
-.play-btn { background:#fff;border:none;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.4);transition:transform .15s; }
-.play-btn:hover { transform:scale(1.06); }
+  .upload-progress { background: var(--surface2); border-radius: 8px; padding: 12px; margin-top: 16px; display: none; }
+  .upload-progress.visible { display: block; }
+  .upload-progress-text { font-size: 12px; color: var(--text2); }
+  .upload-progress-bar { height: 3px; background: var(--surface3); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .upload-progress-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.3s; }
 </style>
 </head>
 <body>
  
-<audio id="bg-music" loop crossorigin="anonymous"></audio>
-<div id="loading-screen" class="screen"><div class="loader"></div><div style="font-size:13px;color:var(--text2);font-weight:500" id="loading-msg">Carregando...</div></div>
+<div id="loading-screen" class="screen">
+  <div class="loading-logo">Retrô</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  <div class="loading-msg" id="loading-msg">Conectando...</div>
+</div>
+ 
 <div id="toast"></div>
  
 <div id="invite-screen" class="screen hidden">
+  <div class="invite-bg"></div>
   <div class="invite-card">
-    <div class="badge">Nossa Retrospectiva</div>
-    <h1 class="invite-title">Uma lembrança para o amor da minha vida</h1>
-    <p class="invite-sub">O amor tudo espera, tudo suporta...</p>
-    <input id="code-input" class="round-input" type="text" placeholder="CÓDIGO DE ACESSO" maxlength="16">
-    <button class="btn-green" onclick="tryEnter()">Ouvir Agora</button>
-    <div id="error-msg" style="color:var(--pink);font-size:13px;margin-top:10px;font-weight:700;"></div>
-    <p style="font-size:12px;color:var(--text2);margin-top:28px;">
-      <a href="#" onclick="promptAdmin()" style="color:var(--green);text-decoration:none;font-weight:700;">Acessar Admin</a>
+    <div class="invite-logo" id="invite-logo-title">Retrô</div>
+    <h1 class="invite-title">Um lugar só para quem importa</h1>
+    <p class="invite-subtitle">Insira o código de convite que você recebeu para acessar esta retrospectiva.</p>
+    <input id="code-input" class="invite-input" type="text" placeholder="••••••••" maxlength="16" autocomplete="off" spellcheck="false">
+    <button class="invite-btn" id="enter-btn" onclick="tryEnter()">Entrar</button>
+    <div id="error-msg" class="invite-error"></div>
+    <hr class="invite-divider">
+    <p class="invite-footer">Você é o criador?<br>
+      <a href="#" onclick="promptAdmin()" style="color:var(--gold);text-decoration:none;">Acessar painel de administração</a>
     </p>
   </div>
 </div>
  
 <div id="admin-screen" class="screen hidden">
   <div class="admin-wrap">
-    <div class="admin-head">
-      <div class="admin-logo"><b>Spotify</b> <span>Wrapped Admin</span></div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-green" onclick="goPlayer()" style="padding:8px 14px;font-size:12px;">▶ Visualizar</button>
-        <button class="btn-green" onclick="logout()" style="padding:8px 14px;font-size:12px;background:#444;color:#fff;">Sair</button>
+    <div class="admin-header">
+      <div class="admin-logo">Retrô <span>·</span> Admin</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span class="admin-badge">Administrador</span>
+        <button class="btn-secondary" onclick="goPlayer()" style="font-size:13px;padding:7px 14px;">Ver retrospectiva →</button>
+        <button class="btn-secondary" onclick="logout()" style="font-size:13px;padding:7px 14px;color:var(--text3);">Sair</button>
       </div>
     </div>
  
-    <div class="sec">
-      <div class="sec-title">🔑 Perfis e Convites</div>
-      <div class="card">
-        <ul class="invite-list" id="invite-list"></ul>
-        <div class="row">
-          <input id="new-code" type="text" placeholder="Código (ex: CASAL2026)">
-          <input id="new-name" type="text" placeholder="Nome do Casal">
-          <button class="btn-green" onclick="addInvite()" style="width:auto;padding:0 18px;">+ Adicionar</button>
+    <div class="admin-section">
+      <div class="admin-section-title">📸 Fotos da Retrospectiva</div>
+      <div class="admin-card">
+        <p style="font-size:12px;color:var(--text3);margin-bottom:12px;" id="active-invite-msg">Selecione um convite abaixo para editar a retrospectiva dele.</p>
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+          <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block;margin:0 auto 10px;opacity:0.5;">
+            <path d="M12 16V4m0 0-4 4m4-4 4 4M4 20h16" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Clique ou arraste fotos aqui para adicionar
         </div>
-      </div>
-    </div>
- 
-    <div class="sec">
-      <div class="sec-title">⚙️ Configurações do Perfil</div>
-      <div class="card">
-        <p style="font-size:12px;color:var(--text2);margin-bottom:14px;" id="active-msg">Selecione um perfil acima.</p>
-        <div class="cfg-grid">
-          <div class="iblk"><label>Título do Álbum</label><input id="f-title" type="text"></div>
-          <div class="iblk"><label>Nome do Casal</label><input id="f-author" type="text"></div>
-          <div class="iblk"><label>🎵 URL da Música (MP3)</label><input id="f-music" type="text"></div>
-          <div class="iblk"><label>📅 Data de Início</label><input id="f-date" type="date"></div>
-        </div>
-        <div class="iblk" style="margin-top:14px;"><label>✉️ Mensagem Final</label><textarea id="f-message"></textarea></div>
-        <button class="btn-green" onclick="saveAllSettings()" style="margin-top:18px;background:#fff;color:#000;">💾 Salvar Perfil</button>
-      </div>
-    </div>
- 
-    <div class="sec">
-      <div class="sec-title">📸 Fotos (arraste para reordenar)</div>
-      <div class="card">
-        <input type="file" id="file-input" accept="image/*" multiple onchange="handleFiles(this.files)" style="display:none;">
-        <button class="btn-green" id="upload-btn" onclick="triggerUpload()" style="background:#333;color:#fff;margin-bottom:10px;">+ Enviar Fotos</button>
-        <div id="upload-status" style="font-size:12px;color:var(--text2);margin-bottom:8px;display:none;"></div>
-        <p class="drag-hint">💡 Arraste as fotos para mudar a ordem de exibição no player.</p>
+        <input type="file" id="file-input" accept="image/*" multiple onchange="handleFiles(this.files)">
         <div class="photo-grid" id="photo-grid"></div>
+        <div id="upload-progress" class="upload-progress">
+          <div id="upload-progress-text" class="upload-progress-text">Enviando...</div>
+          <div class="upload-progress-bar">
+            <div id="upload-progress-fill" class="upload-progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--text3);margin-top:12px;" id="photo-count-msg"></p>
       </div>
     </div>
+ 
+    <div class="admin-section">
+      <div class="admin-section-title">🔑 Convites</div>
+      <div class="admin-card">
+        <ul class="invite-list" id="invite-list"><li style="color:var(--text3);font-size:14px;padding:8px 0;">Carregando...</li></ul>
+        <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+        <div class="add-invite-row">
+          <input id="new-code-input" type="text" placeholder="Código (ex: MARIA2025)" maxlength="16">
+          <input id="new-name-input" type="text" placeholder="Nome do convidado" maxlength="40">
+          <button class="btn-add" id="add-invite-btn" onclick="addInvite()">+ Adicionar</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+          <button class="btn-secondary" onclick="generateCode()" style="font-size:13px;">🎲 Gerar código aleatório</button>
+          <button class="btn-secondary" onclick="copyInviteLink()" style="font-size:13px;">🔗 Copiar link do site</button>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="admin-section">
+      <div class="admin-section-title">⚙️ Configurações</div>
+      <div class="admin-card">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div>
+            <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:8px;">Título da Retrospectiva</label>
+            <input id="retro-title" type="text" placeholder="Ex: Nossa História 2025"
+              style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:15px;color:var(--text);width:100%;font-family:'Inter',sans-serif;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:8px;">Subtítulo / Autor</label>
+            <input id="retro-author" type="text" placeholder="Ex: Feito com amor por Maria"
+              style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:15px;color:var(--text);width:100%;font-family:'Inter',sans-serif;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:8px;">Tempo por foto (segundos)</label>
+            <input type="range" id="slide-duration" min="2" max="20" value="6" step="1"
+              style="width:200px;" oninput="document.getElementById('duration-out').textContent=this.value+'s'">
+            <span id="duration-out" style="font-size:14px;color:var(--gold);margin-left:12px;font-weight:500;">6s</span>
+          </div>
+          <div>
+            <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:8px;">Senha do Admin</label>
+            <div style="display:flex;gap:10px;">
+              <input id="admin-password" type="password" placeholder="Nova senha (mín. 4 caracteres)"
+                style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--text);flex:1;font-family:'Inter',sans-serif;outline:none;">
+              <button class="btn-add" onclick="changeAdminPwd()">Salvar</button>
+            </div>
+          </div>
+          <button class="btn-add" onclick="saveAllSettings()" style="align-self:flex-start;padding:10px 24px;">💾 Salvar configurações</button>
+        </div>
+      </div>
+    </div>
+    <div style="height:40px;"></div>
   </div>
 </div>
  
 <div id="player-screen" class="screen hidden">
-  <div id="player-bg"></div>
-  <div class="player-wrap">
-    <div class="bars" id="bars"></div>
-    <div class="p-header">
-      <svg width="22" height="22" fill="white" viewBox="0 0 24 24" onclick="exitPlayer()" style="cursor:pointer"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
-      <div class="p-ctx">Nossa História</div>
-      <svg width="22" height="22" fill="white" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
-    </div>
- 
-    <div class="art-box">
-      <img id="album-art" src="" alt="">
- 
-      <div class="w-counter" id="w-counter">
-        <div class="cnt-badge">Nosso Tempo</div>
-        <div class="cnt-days" id="cnt-days">0 Dias</div>
-        <div class="cnt-sub" id="cnt-sub">Conectados de corpo e alma.</div>
-      </div>
- 
-      <div class="w-message" id="w-message">
-        <div class="msg-lbl">Sua Mensagem Final</div>
-        <div class="msg-bubble" id="msg-text"></div>
+  <div class="player-bg" id="player-bg"></div>
+  <div class="player-layout">
+    <div class="player-topbar">
+      <button class="player-menu-btn" onclick="exitPlayer()">← Voltar</button>
+      <div class="player-brand" id="player-brand-title">Retrô</div>
+      <div style="display:flex;gap:8px;">
+        <button class="speed-btn" id="speed-btn" onclick="cycleSpeed()">6s</button>
+        <button class="player-menu-btn" id="fullscreen-img-btn" onclick="openFullscreen()" style="display:none;">⛶ Ampliar</button>
       </div>
     </div>
  
-    <div class="meta">
-      <div class="meta-text">
-        <div class="meta-title" id="p-title">Carregando...</div>
-        <div class="meta-author" id="p-author"></div>
+    <div id="player-empty" style="display:none;" class="empty-player">
+      <svg width="64" height="64" fill="none" stroke="var(--text3)" stroke-width="1" viewBox="0 0 24 24" style="margin:0 auto 16px;display:block;">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>
+      </svg>
+      <h2>Nenhuma foto ainda</h2>
+      <p>O administrador ainda não adicionou fotos.<br>Volte em breve!</p>
+    </div>
+ 
+    <div id="player-content" style="display:none;flex-direction:column;align-items:center;width:100%;flex:1;overflow:hidden;">
+      <div class="album-art-wrap">
+        <img id="album-art" class="album-art" src="" alt="Foto atual" style="display:none;" ondblclick="openFullscreen()">
+        <div id="album-placeholder" class="album-placeholder">
+          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>
+          </svg>
+          <span>Carregando fotos...</span>
+        </div>
       </div>
-    </div>
  
-    <div class="prog-wrap">
-      <div class="prog-track" onclick="scrub(event)"><div class="prog-fill" id="prog-fill"></div></div>
-      <div class="prog-times"><span id="t-cur">0:00</span><span id="t-tot">0:06</span></div>
-    </div>
+      <div class="photo-counter" id="photo-counter"></div>
+      <div class="slideshow-indicator" id="dots-wrap"></div>
  
-    <div class="controls">
-      <button class="ibtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
-      <button class="ibtn" onclick="prevSlide()"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
-      <button class="play-btn" onclick="togglePlay()" id="play-btn">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
-      </button>
-      <button class="ibtn" onclick="nextSlide()"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M18 6h-2v12h2zM5 18l11-6L5 6v12z"/></svg></button>
-      <button class="ibtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v3h12v-6h-2v4z"/></svg></button>
+      <div class="track-info">
+        <div>
+          <div class="track-title" id="track-title">—</div>
+          <div class="track-caption" id="track-caption">—</div>
+        </div>
+        <button class="heart-btn" id="heart-btn" onclick="toggleLike()">♡</button>
+      </div>
+ 
+      <div class="progress-wrap">
+        <div class="progress-bar-track" id="prog-track" onclick="scrubProgress(event)">
+          <div class="progress-bar-fill" id="prog-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-times">
+          <span id="time-cur">0:00</span>
+          <span id="time-total">0:00</span>
+        </div>
+      </div>
+ 
+      <div class="controls">
+        <button class="ctrl-btn" id="shuffle-btn" onclick="toggleShuffle()" title="Aleatório">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+            <path d="M16 3h5v5M4 20l5-5M16 21l5-5-5-5M4 4l16 16" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="ctrl-btn" onclick="prevPhoto()" title="Anterior">
+          <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+        <button class="play-btn" id="play-btn" onclick="togglePlay()">
+          <svg id="play-icon" width="28" height="28" fill="#1a0e00" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="ctrl-btn" onclick="nextPhoto()" title="Próxima">
+          <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M18 6h-2v12h2zM5 18l11-6L5 6v12z"/></svg>
+        </button>
+        <button class="ctrl-btn" id="repeat-btn" onclick="toggleRepeat()" title="Repetir">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+            <path d="M17 1l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7 23l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+ 
+      <div class="thumb-row" id="thumb-row"></div>
     </div>
   </div>
 </div>
  
-<script>
-const SUPABASE_URL = 'https://eromoiokvtnienjojson.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyb21vaW9rdnRuaWVuam9qc29uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NTQwMDQsImV4cCI6MjA5NjUzMDAwNH0.iqETV9HYsQx17GQ1BCo1Ui9-YKNJjZg3cnXtfN2hNOY';
+<div id="fullscreen-overlay" onclick="closeFullscreen()">
+  <button class="close-fs" onclick="event.stopPropagation();closeFullscreen()">✕</button>
+  <img id="fullscreen-img" src="" alt="Foto em tela cheia">
+</div>
  
+<script>
+// ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://eromoiokvtnienjojson.supabase.co';
+// CORRIGIDO: usando a anon key JWT correta
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyb21vaW9rdnRuaWVuam9qc29uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NTQwMDQsImV4cCI6MjA5NjUzMDAwNH0.iqETV9HYsQx17GQ1BCo1Ui9-YKNJjZg3cnXtfN2hNOY';
+const BUCKET = 'photos';
+ 
+// ─── SUPABASE REST HELPER ─────────────────────────────────────────────────────
 async function sb(path, opts = {}) {
-  const h = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' };
-  if (opts.prefer) h['Prefer'] = opts.prefer;
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: h, method: opts.method || 'GET', body: opts.body ? JSON.stringify(opts.body) : undefined });
-  const txt = await res.text();
-  try { return txt ? JSON.parse(txt) : null; } catch { return null; }
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+  };
+  // Só adiciona Prefer se tiver valor
+  if (opts.prefer) headers['Prefer'] = opts.prefer;
+ 
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers,
+    method: opts.method || 'GET',
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+ 
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Supabase error ${res.status}: ${err}`);
+  }
+  const text = await res.text();
+  if (!text) return null;
+  try { return JSON.parse(text); } catch(e) { return null; }
 }
  
-// ── STATE ──
-const DEF = { title:'Nosso Wrapped', author:'Memórias de Nós Dois', music:'', date:'', message:'', admin_password:'admin123' };
-let baseSettings = {...DEF}, inviteSettings = {}, settings = {...DEF};
-let photos = [], invites = [], activeInvite = null;
-let curIdx = 0, playing = false, progInterval = null, cntInterval = null, progSec = 0;
-const SLIDE_DUR = 6;
-const audio = document.getElementById('bg-music');
+// ─── SUPABASE STORAGE UPLOAD ──────────────────────────────────────────────────
+async function uploadToStorage(file, filename) {
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${filename}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': file.type,
+      'x-upsert': 'true'
+    },
+    body: file
+  });
  
-// ── INIT ──
+  if (!res.ok) {
+    const errText = await res.text();
+    let errMsg = `Status ${res.status}`;
+    try {
+      const errJson = JSON.parse(errText);
+      errMsg = errJson.message || errJson.error || errMsg;
+    } catch(e) { errMsg = errText || errMsg; }
+    throw new Error(errMsg);
+  }
+  return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filename}`;
+}
+ 
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const DEFAULT_SETTINGS = { title: 'Nossa Retrospectiva', author: 'Uma coleção especial', duration: 6, admin_password: 'admin123' };
+let baseSettings = { ...DEFAULT_SETTINGS };
+let inviteSettings = {};
+let settings = { ...DEFAULT_SETTINGS };
+let photos = [];
+let invites = [];
+let activeInvite = null;
+let currentInviteCode = localStorage.getItem('active_invite_code');
+let currentIndex = 0;
+let isPlaying = false;
+let isShuffle = false;
+let isRepeat = false;
+let progressInterval = null;
+let progressSec = 0;
+let playOrder = [];
+let shuffledOrder = [];
+let isAdmin = false;
+ 
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  try { await loadSettings(); await loadInvites(); switchScreen('invite-screen'); }
-  catch(e) { document.getElementById('loading-msg').textContent = 'Erro. Tente recarregar.'; }
+  setLoading('Conectando ao banco de dados...');
+  try {
+    await loadSettings();
+    setLoading('Quase lá...');
+    switchScreen('invite-screen');
+    document.getElementById('invite-logo-title').textContent = settings.title || 'Retrô';
+  } catch (e) {
+    setLoading('Erro ao conectar. Verifique as configurações do Supabase.');
+    console.error('Init error:', e);
+  }
 });
  
+function setLoading(msg) {
+  document.getElementById('loading-msg').textContent = msg;
+}
+ 
 async function loadSettings() {
-  const rows = await sb('settings?select=key,value') || [];
-  baseSettings = {...DEF}; inviteSettings = {};
-  rows.forEach(r => {
-    const m = String(r.key).match(/^invite:([^:]+):(title|author|music|date|message)$/);
-    if (m) { const [,c,f]=m; inviteSettings[c]=inviteSettings[c]||{}; inviteSettings[c][f]=r.value; }
-    else baseSettings[r.key] = r.value;
-  });
-  applySettings();
-}
- 
-function applySettings() {
-  settings = activeInvite && inviteSettings[activeInvite.code]
-    ? {...DEF, ...baseSettings, ...inviteSettings[activeInvite.code]}
-    : {...DEF, ...baseSettings};
-}
- 
-async function loadInvites() { invites = await sb('invites?select=*') || []; }
- 
-async function loadPhotos() {
-  if (!activeInvite) return;
-  const all = await sb('photos?select=*&order=position.asc,created_at.asc') || [];
-  photos = all.filter(p => p.invite_code === activeInvite.code);
-}
- 
-// ── SCREENS ──
-function switchScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
-function toast(msg, bg) { const t=document.getElementById('toast'); t.style.background=bg||'var(--blue)'; t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
-function logout() { activeInvite = null; switchScreen('invite-screen'); }
-
-// ── INVITE FLOW ──
-async function tryEnter() {
-  const code = document.getElementById('code-input').value.trim().toUpperCase();
-  const found = invites.find(i => i.code === code);
-  if (!found) { document.getElementById('error-msg').textContent = 'Código incorreto.'; return; }
-  activeInvite = found;
-  switchScreen('loading-screen');
-  document.getElementById('loading-msg').textContent = 'Carregando sua retrospectiva...';
-  await loadSettings(); applySettings(); await loadPhotos();
-  if (settings.music) { audio.src = settings.music; audio.load(); } else audio.removeAttribute('src');
-  goPlayer();
-}
- 
-// ── PLAYER ──
-function goPlayer() {
-  switchScreen('player-screen');
-  if (!photos.length) photos = [{ id:'_demo', src:'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600', invite_code:'', position:0 }];
-  curIdx = 0; playing = false;
-  updatePlayBtn();
-  audio.pause();
-  buildBars();
-  showSlide(0);
-}
- 
-function buildBars() {
-  const wrap = document.getElementById('bars'); wrap.innerHTML = '';
-  const total = photos.length + 2;
-  for (let i=0;i<total;i++) wrap.innerHTML += `<div class="bar-bg"><div class="bar-fill" id="b${i}"></div></div>`;
-}
- 
-// ── RELATIONSHIP COUNTER ──
-function calcTime(dateStr) {
-  if (!dateStr) return { days:0, text:'Nenhuma data registrada' };
-  const [y,m,d] = dateStr.split('-').map(Number);
-  const start = new Date(y, m-1, d);
-  const today = new Date(); today.setHours(0,0,0,0);
-  const ms = today - start;
-  if (ms < 0) return { days:0, text:'Data no futuro' };
-  const days = Math.floor(ms / 86400000);
-  let yr = today.getFullYear()-start.getFullYear(), mo = today.getMonth()-start.getMonth(), da = today.getDate()-start.getDate();
-  if (da<0) { mo--; da += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); }
-  if (mo<0) { yr--; mo+=12; }
-  const p = [];
-  if (yr>0) p.push(`${yr} ${yr===1?'Ano':'Anos'}`);
-  if (mo>0) p.push(`${mo} ${mo===1?'Mês':'Meses'}`);
-  if (da>0||p.length===0) p.push(`${da} ${da===1?'Dia':'Dias'}`);
-  return { days, text: p.join(', ') + ' juntos.' };
-}
-function refreshCounter() {
-  const t = calcTime(settings.date);
-  document.getElementById('cnt-days').textContent = `${t.days} Dias`;
-  document.getElementById('cnt-sub').textContent = t.text;
-}
- 
-// ── SHOW SLIDE ──
-function showSlide(idx) {
-  const total = photos.length + 2;
-  if (idx < 0) { curIdx = 0; return; }
-  if (idx >= total) { curIdx = total-1; pause(); return; }
- 
-  clearInterval(cntInterval); cntInterval = null;
- 
-  const artEl   = document.getElementById('album-art');
-  const counter = document.getElementById('w-counter');
-  const message = document.getElementById('w-message');
-  
-  counter.classList.remove('on');
-  message.classList.remove('on');
-  artEl.style.opacity = '0';
- 
-  for (let i=0; i<total; i++) { const b=document.getElementById(`b${i}`); if(b) b.style.width = i<idx?'100%':'0%'; }
- 
-  progSec = 0;
-  document.getElementById('t-tot').textContent = `0:${String(SLIDE_DUR).padStart(2,'0')}`;
-  document.getElementById('t-cur').textContent = '0:00';
-  document.getElementById('prog-fill').style.width = '0%';
- 
-  if (idx === 0) {
-    document.getElementById('player-bg').style.backgroundImage = '';
-    document.getElementById('player-bg').style.background = 'linear-gradient(155deg,#c4005c,#4a0e4e)';
-    counter.classList.add('on');
-    refreshCounter();
-    cntInterval = setInterval(refreshCounter, 1000);
-    document.getElementById('p-title').textContent = settings.title || 'Nosso Wrapped';
-    document.getElementById('p-author').textContent = settings.author || '';
- 
-  } else if (idx === total-1) {
-    document.getElementById('player-bg').style.backgroundImage = '';
-    document.getElementById('player-bg').style.background = 'linear-gradient(145deg,#003d61,#c45000)';
-    message.classList.add('on');
-    document.getElementById('msg-text').textContent = settings.message || 'Fim da retrospectiva!';
-    document.getElementById('p-title').textContent = 'Fim ❤️';
-    document.getElementById('p-author').textContent = settings.author || '';
- 
-  } else {
-    const photo = photos[idx - 1];
-    const bg = document.getElementById('player-bg');
-    bg.style.background = '';
- 
-    artEl.src = photo.src;
-    artEl.style.opacity = '1';
-    bg.style.backgroundImage = `url('${photo.src}')`;
- 
-    document.getElementById('p-title').textContent = `Memória ${idx}`;
-    document.getElementById('p-author').textContent = settings.author || '';
+  try {
+    const rows = await sb('settings?select=key,value');
+    baseSettings = { ...DEFAULT_SETTINGS };
+    inviteSettings = {};
+    if (rows) {
+      rows.forEach(r => {
+        const match = String(r.key).match(/^invite:([^:]+):(title|author|duration)$/);
+        if (match) {
+          const [, code, field] = match;
+          inviteSettings[code] = inviteSettings[code] || {};
+          inviteSettings[code][field] = r.value;
+        } else {
+          baseSettings[r.key] = r.value;
+        }
+      });
+    }
+    applyActiveInviteSettings();
+  } catch(e) {
+    console.warn('Erro ao carregar configurações, usando padrões:', e);
+    applyActiveInviteSettings();
   }
 }
  
-function togglePlay() {
-  if (playing) { pause(); return; }
-  playing = true;
-  if (settings.music) audio.play().catch(()=>{});
-  updatePlayBtn();
-  clearInterval(progInterval);
-  progInterval = setInterval(() => {
-    progSec += 0.05;
-    const pct = (progSec/SLIDE_DUR)*100;
-    const b = document.getElementById(`b${curIdx}`); if(b) b.style.width = `${pct}%`;
-    document.getElementById('prog-fill').style.width = `${pct}%`;
-    document.getElementById('t-cur').textContent = `0:${String(Math.floor(progSec)).padStart(2,'0')}`;
-    if (progSec >= SLIDE_DUR) { curIdx++; showSlide(curIdx); }
-  }, 50);
+async function loadPhotos() {
+  try {
+    if (!activeInvite) {
+      photos = [];
+      return;
+    }
+    const rows = await sb('photos?select=*&order=position.asc,created_at.asc');
+    const prefix = getInviteStoragePrefix(activeInvite.code);
+    photos = (rows || []).filter(p => String(p.src || '').includes(prefix));
+  } catch (e) {
+    console.error('Erro ao carregar fotos:', e);
+    photos = [];
+  }
 }
  
-function pause() { playing=false; audio.pause(); clearInterval(progInterval); updatePlayBtn(); }
-function updatePlayBtn() {
-  document.getElementById('play-btn').innerHTML = playing
-    ? `<svg viewBox="0 0 24 24" width="24" height="24" fill="#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
-    : `<svg viewBox="0 0 24 24" width="24" height="24" fill="#000"><path d="M8 5v14l11-7z"/></svg>`;
+async function loadInvites() {
+  const rows = await sb('invites?select=*');
+  invites = rows || [];
+  if (currentInviteCode) {
+    activeInvite = invites.find(inv => inv.code === currentInviteCode) || activeInvite;
+  }
 }
-function nextSlide() { pause(); curIdx++; showSlide(curIdx); }
-function prevSlide() { pause(); curIdx--; showSlide(curIdx); }
-function scrub(e) { const r=e.currentTarget.getBoundingClientRect(); progSec=((e.clientX-r.left)/r.width)*SLIDE_DUR; }
-function exitPlayer() { pause(); clearInterval(cntInterval); switchScreen('invite-screen'); }
  
-// ── ADMIN ──
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function toast(msg, duration = 2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+ 
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/\r?\n/g, ' ');
+}
+
+function jsArg(value) {
+  return escapeAttr(JSON.stringify(String(value ?? '')));
+}
+
+function getInviteKey(code) {
+  return String(code || 'sem-codigo').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '-');
+}
+
+function getInviteStoragePrefix(code) {
+  return `/storage/v1/object/public/${BUCKET}/${getInviteKey(code)}/`;
+}
+
+function applyActiveInviteSettings() {
+  const code = activeInvite?.code ? getInviteKey(activeInvite.code) : null;
+  settings = {
+    ...baseSettings,
+    ...(code && inviteSettings[code] ? inviteSettings[code] : {})
+  };
+  settings.duration = parseInt(settings.duration) || 6;
+}
+
+function setActiveInvite(invite) {
+  activeInvite = invite || null;
+  currentInviteCode = activeInvite?.code || null;
+  if (currentInviteCode) localStorage.setItem('active_invite_code', currentInviteCode);
+  applyActiveInviteSettings();
+  updateActiveInviteUI();
+}
+
+function updateActiveInviteUI() {
+  const msg = document.getElementById('active-invite-msg');
+  if (msg) {
+    msg.textContent = activeInvite
+      ? `Editando retrospectiva do convite ${activeInvite.code} (${activeInvite.name || 'Convidado'})`
+      : 'Selecione um convite abaixo para editar a retrospectiva dele.';
+  }
+  renderInvites();
+}
+ 
+// ─── AUTH ──────────────────────────────────────────────────────────────────────
+async function tryEnter() {
+  const raw = document.getElementById('code-input').value.trim().toUpperCase();
+  if (!raw) return;
+  const btn = document.getElementById('enter-btn');
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+  try {
+    const rows = await sb(`invites?code=eq.${encodeURIComponent(raw)}&select=id,code,used`);
+    if (rows && rows.length > 0) {
+      const inv = rows[0];
+      setActiveInvite(inv);
+      // Marca como usado sem exigir retorno
+      await sb(`invites?id=eq.${encodeURIComponent(inv.id)}`, {
+        method: 'PATCH',
+        body: { used: true },
+        prefer: 'return=minimal'
+      });
+      await goPlayer();
+    } else {
+      showError('Código inválido ou expirado.');
+    }
+  } catch (e) {
+    showError('Erro ao verificar. Tente novamente.');
+    console.error('tryEnter error:', e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+  }
+}
+ 
+function showError(msg) {
+  document.getElementById('error-msg').textContent = msg;
+  const inp = document.getElementById('code-input');
+  inp.classList.add('error');
+  setTimeout(() => inp.classList.remove('error'), 500);
+}
+ 
 function promptAdmin() {
-  const p = prompt('Senha Admin:');
-  if (p === baseSettings.admin_password) { switchScreen('admin-screen'); renderInvites(); }
-  else if (p !== null) alert('Senha incorrecta.');
+  const pwd = prompt('Senha do administrador:');
+  if (!pwd) return;
+  if (pwd.trim() === String(settings.admin_password || 'admin123').trim()) {
+    enterAdmin();
+  } else {
+    alert('Senha incorreta.');
+  }
 }
  
+async function enterAdmin() {
+  isAdmin = true;
+  setLoading('Carregando painel...');
+  switchScreen('loading-screen');
+  try {
+    await loadInvites();
+    const savedCode = localStorage.getItem('active_invite_code');
+    const selected = invites.find(inv => inv.code === savedCode) || invites[0] || null;
+    setActiveInvite(selected);
+    await loadPhotos();
+    renderInvites();
+    renderPhotoGrid();
+    populateSettingsForm();
+    switchScreen('admin-screen');
+  } catch (e) {
+    toast('Erro ao carregar dados: ' + e.message);
+    console.error(e);
+    switchScreen('invite-screen');
+  }
+}
+ 
+function logout() {
+  isAdmin = false;
+  document.getElementById('code-input').value = '';
+  isPlaying = false;
+  stopTimer();
+  switchScreen('invite-screen');
+}
+ 
+// ─── ADMIN: INVITES ────────────────────────────────────────────────────────────
 function renderInvites() {
-  const list = document.getElementById('invite-list'); list.innerHTML = '';
-  if (!invites.length) { list.innerHTML = '<li style="color:var(--text2);font-size:13px;padding:8px">Nenhum perfil criado.</li>'; return; }
-  invites.forEach(inv => {
-    const li = document.createElement('li');
-    li.className = 'invite-item' + (activeInvite?.code === inv.code ? ' selected' : '');
-    li.innerHTML = `<div><span class="inv-code">[${inv.code}]</span> — ${inv.name}</div><button class="btn-del" onclick="event.stopPropagation();deleteInvite('${inv.id}','${inv.code}')">Excluir</button>`;
-    li.onclick = () => selectProfile(inv.code);
-    list.appendChild(li);
-  });
+  const list = document.getElementById('invite-list');
+  if (!invites.length) {
+    list.innerHTML = '<li style="color:var(--text3);font-size:14px;padding:8px 0;">Nenhum convite criado ainda.</li>';
+    return;
+  }
+  list.innerHTML = invites.map(inv => `
+    <li class="invite-item" style="${activeInvite?.id === inv.id ? 'border-color:var(--gold);' : ''}">
+      <span class="invite-code">${escapeHtml(inv.code)}</span>
+      <span class="invite-name">${escapeHtml(inv.name || '—')}</span>
+      <span class="invite-status ${inv.used ? 'used' : 'unused'}">${inv.used ? 'Usado' : 'Disponível'}</span>
+      <button class="btn-secondary" onclick="selectInvite(${jsArg(inv.id)})" style="font-size:12px;padding:5px 10px;">Editar</button>
+      <button class="btn-delete" onclick="removeInvite(${jsArg(inv.id)}, ${jsArg(inv.code)})">✕</button>
+    </li>
+  `).join('');
+}
+
+async function selectInvite(id) {
+  const invite = invites.find(inv => String(inv.id) === String(id));
+  if (!invite) { toast('Convite não encontrado.'); return; }
+  setActiveInvite(invite);
+  await loadPhotos();
+  renderPhotoGrid();
+  populateSettingsForm();
 }
  
 async function addInvite() {
-  const code = document.getElementById('new-code').value.trim().toUpperCase();
-  const name = document.getElementById('new-name').value.trim();
-  if (!code||!name) { toast('Preencha código e nome!','#f55'); return; }
-  if (invites.find(i=>i.code===code)) { toast('Código já existe!','#f55'); return; }
-  await sb('invites',{method:'POST',prefer:'return=representation',body:{code,name}});
-  document.getElementById('new-code').value=''; document.getElementById('new-name').value='';
-  toast('Perfil adicionado!'); await loadInvites(); renderInvites();
-}
+  const code = document.getElementById('new-code-input').value.trim().toUpperCase();
+  const name = document.getElementById('new-name-input').value.trim();
+  if (!code) { toast('Digite um código.'); return; }
+  if (invites.find(i => i.code === code)) { toast('Código já existe.'); return; }
  
-async function deleteInvite(id, code) {
-  if (!confirm(`Deletar "${code}"?`)) return;
-  await sb(`invites?id=eq.${id}`,{method:'DELETE'});
-  if (activeInvite?.code===code) { activeInvite=null; document.getElementById('active-msg').textContent='Selecione um perfil acima.'; document.getElementById('photo-grid').innerHTML=''; }
-  toast('Removido!'); await loadInvites(); renderInvites();
-}
- 
-async function selectProfile(code) {
-  activeInvite = invites.find(i=>i.code===code);
-  applySettings();
-  document.getElementById('active-msg').innerHTML = `Perfil Ativo: <b style="color:var(--green)">${activeInvite.name}</b>`;
-  document.getElementById('f-title').value   = settings.title||'';
-  document.getElementById('f-author').value  = settings.author||'';
-  document.getElementById('f-music').value   = settings.music||'';
-  document.getElementById('f-date').value    = settings.date||'';
-  document.getElementById('f-message').value = settings.message||'';
-  document.querySelectorAll('.invite-item').forEach(el => el.classList.remove('selected'));
-  document.querySelectorAll('.invite-item').forEach(el => { if(el.textContent.includes(`[${code}]`)) el.classList.add('selected'); });
-  await loadPhotos(); renderPhotosGrid();
-}
- 
-// ── PHOTOS GRID COM DRAG-AND-DROP ──
-let dragSrc = null;
- 
-function renderPhotosGrid() {
-  const grid = document.getElementById('photo-grid'); grid.innerHTML = '';
-  if (!photos.length) { grid.innerHTML='<p style="color:var(--text2);font-size:13px;">Nenhuma foto ainda.</p>'; return; }
-  photos.forEach((p, i) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'photo-thumb';
-    wrap.draggable = true;
-    wrap.dataset.id = p.id;
-    wrap.dataset.idx = i;
-    wrap.innerHTML = `
-      <img src="${p.src}" loading="lazy">
-      <div class="photo-num">${i+1}</div>
-      <div class="photo-overlay"><button onclick="deletePhoto('${p.id}')">Apagar</button></div>`;
- 
-    wrap.addEventListener('dragstart', e => {
-      dragSrc = wrap;
-      wrap.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    wrap.addEventListener('dragend', () => wrap.classList.remove('dragging'));
-    wrap.addEventListener('dragover', e => { e.preventDefault(); wrap.classList.add('drag-over'); });
-    wrap.addEventListener('dragleave', () => wrap.classList.remove('drag-over'));
-    wrap.addEventListener('drop', async e => {
-      e.preventDefault();
-      wrap.classList.remove('drag-over');
-      if (!dragSrc || dragSrc === wrap) return;
-      const fromIdx = parseInt(dragSrc.dataset.idx);
-      const toIdx   = parseInt(wrap.dataset.idx);
-      const [moved] = photos.splice(fromIdx, 1);
-      photos.splice(toIdx, 0, moved);
-      renderPhotosGrid();
-      await savePhotoOrder();
-    });
- 
-    grid.appendChild(wrap);
-  });
-}
- 
-async function savePhotoOrder() {
-  if (!photos || !photos.length) return;
-  photos.forEach((photo, index) => { photo.position = index; });
+  const btn = document.getElementById('add-invite-btn');
+  btn.disabled = true;
   try {
-    const promises = photos.map(photo => 
-      sb(`photos?id=eq.${photo.id}`, { 
-        method: 'PATCH', 
-        prefer: 'return=minimal', 
-        body: { position: photo.position } 
-      })
-    );
-    await Promise.all(promises);
-    toast('Ordem salva!');
-  } catch(err) {
-    console.error(err);
-    toast('Erro ao sincronizar ordem.', '#ff4b91');
+    await sb('invites', {
+      method: 'POST',
+      body: { code, name: name || 'Convidado', used: false },
+      prefer: 'return=representation'
+    });
+    await loadInvites();
+    setActiveInvite(invites.find(inv => inv.code === code) || null);
+    renderInvites();
+    await loadPhotos();
+    renderPhotoGrid();
+    populateSettingsForm();
+    document.getElementById('new-code-input').value = '';
+    document.getElementById('new-name-input').value = '';
+    toast(`Convite "${code}" criado!`);
+  } catch (e) {
+    toast('Erro ao criar convite: ' + e.message);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
   }
 }
  
-function triggerUpload() {
-  if (!activeInvite) { alert('Selecione um perfil primeiro.'); return; }
-  const inp = document.getElementById('file-input'); inp.value=''; inp.click();
+async function removeInvite(id, code) {
+  if (!confirm(`Remover convite "${code}"?`)) return;
+  try {
+    await sb(`invites?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+    await loadInvites();
+    if (activeInvite?.id === id) {
+      setActiveInvite(invites[0] || null);
+      await loadPhotos();
+      renderPhotoGrid();
+      populateSettingsForm();
+    }
+    renderInvites();
+    toast('Convite removido.');
+  } catch (e) {
+    toast('Erro ao remover: ' + e.message);
+  }
 }
  
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  document.getElementById('new-code-input').value = code;
+}
+ 
+function copyInviteLink() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url)
+    .then(() => toast('Link copiado!'))
+    .catch(() => toast('Copie manualmente: ' + url));
+}
+ 
+// ─── ADMIN: PHOTOS ─────────────────────────────────────────────────────────────
 async function handleFiles(files) {
-  if (!files?.length || !activeInvite) return;
-  const btn = document.getElementById('upload-btn');
-  const status = document.getElementById('upload-status');
-  btn.disabled = true; status.style.display='block';
-  let ok=0, fail=0;
-  for (let i=0; i<files.length; i++) {
-    status.textContent = `Enviando ${i+1}/${files.length}...`;
+  if (!activeInvite) { toast('Selecione um convite antes de adicionar fotos.'); return; }
+  const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (!arr.length) { toast('Nenhuma imagem selecionada.'); return; }
+ 
+  const prog = document.getElementById('upload-progress');
+  const fill = document.getElementById('upload-progress-fill');
+  const txt = document.getElementById('upload-progress-text');
+  prog.classList.add('visible');
+ 
+  let successCount = 0;
+ 
+  for (let i = 0; i < arr.length; i++) {
+    const file = arr[i];
+    txt.textContent = `Enviando ${i + 1} de ${arr.length}: ${file.name}`;
+    fill.style.width = Math.round((i / arr.length) * 100) + '%';
+ 
     try {
-      const src = await compressImage(files[i], 700, 700);
-      const r = await sb('photos',{method:'POST',prefer:'return=representation',body:{src, invite_code:activeInvite.code, position:photos.length+i}});
-      if(r) ok++; else fail++;
-    } catch { fail++; }
+      // Gera nome único
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const filename = `${getInviteKey(activeInvite.code)}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext || 'jpg'}`;
+ 
+      // 1. Faz upload para o Storage
+      const publicUrl = await uploadToStorage(file, filename);
+ 
+      // 2. Nome sem extensão para usar como título
+      const name = file.name.replace(/\.[^.]+$/, '');
+      const position = photos.length + successCount;
+ 
+      // 3. Salva registro no banco
+      await sb('photos', {
+        method: 'POST',
+        body: { name, caption: '', src: publicUrl, position, liked: false },
+        prefer: 'return=minimal'
+      });
+ 
+      successCount++;
+    } catch (e) {
+      console.error(`Falha no upload de ${file.name}:`, e);
+      toast(`❌ Erro em "${file.name}": ${e.message}`, 4000);
+    }
   }
-  status.textContent = `✅ ${ok} enviada(s)${fail?` | ❌ ${fail} falha(s)`:''}`;
-  btn.disabled=false;
-  await loadPhotos(); renderPhotosGrid();
-  if(ok) toast(`${ok} foto(s) adicionada(s)!`);
+ 
+  fill.style.width = '100%';
+  txt.textContent = successCount === arr.length
+    ? `✅ ${successCount} foto(s) enviada(s) com sucesso!`
+    : `⚠️ ${successCount} de ${arr.length} foto(s) enviadas.`;
+ 
+  setTimeout(() => prog.classList.remove('visible'), 3000);
+ 
+  // Limpa o input para permitir re-upload do mesmo arquivo
+  document.getElementById('file-input').value = '';
+ 
+  await loadPhotos();
+  renderPhotoGrid();
+ 
+  if (successCount > 0) toast(`${successCount} foto(s) adicionada(s)!`);
 }
  
-function compressImage(file, mw, mh) {
-  return new Promise((res,rej) => {
-    const reader = new FileReader(); reader.readAsDataURL(file);
-    reader.onload = ev => {
-      const img = new Image(); img.src = ev.target.result;
-      img.onload = () => {
-        let w=img.width, h=img.height;
-        if(w>h){ if(w>mw){ h=Math.round(h*mw/w); w=mw; } }
-        else { if(h>mh){ w=Math.round(w*mh/h); h=mh; } }
-        const c=document.createElement('canvas'); c.width=w; c.height=h;
-        c.getContext('2d').drawImage(img,0,0,w,h);
-        res(c.toDataURL('image/jpeg',.75));
-      };
-      img.onerror=rej;
-    };
-    reader.onerror=rej;
-  });
+// Drag & drop
+const uploadZone = document.getElementById('upload-zone');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+ 
+function renderPhotoGrid() {
+  const grid = document.getElementById('photo-grid');
+  const msg = document.getElementById('photo-count-msg');
+  if (!activeInvite) {
+    grid.innerHTML = '';
+    msg.textContent = 'Selecione um convite para editar a retrospectiva dele.';
+    return;
+  }
+  if (!photos.length) {
+    grid.innerHTML = '';
+    msg.textContent = `Nenhuma foto adicionada para o convite ${activeInvite.code}.`;
+    return;
+  }
+  msg.textContent = `${photos.length} foto${photos.length !== 1 ? 's' : ''} na retrospectiva do convite ${activeInvite.code}`;
+  grid.innerHTML = photos.map((p, i) => `
+    <div class="photo-thumb-wrap">
+      <img src="${escapeAttr(p.src)}" alt="${escapeAttr(p.name || 'foto')}" loading="lazy">
+      <div class="photo-thumb-overlay">
+        <button onclick="movePhoto(${jsArg(p.id)}, ${i}, -1)">↑ Mover</button>
+        <button onclick="movePhoto(${jsArg(p.id)}, ${i}, 1)">↓ Mover</button>
+        <button class="remove-btn" onclick="removePhoto(${jsArg(p.id)}, ${jsArg(p.src)})">Remover</button>
+      </div>
+      <input class="caption-input" type="text" placeholder="Legenda..." value="${escapeAttr(p.caption || '')}"
+        onchange="updateCaption(${jsArg(p.id)}, this.value)" onclick="event.stopPropagation()">
+    </div>
+  `).join('');
 }
  
-async function deletePhoto(id) {
-  if (!confirm('Apagar esta foto?')) return;
-  await sb(`photos?id=eq.${id}`,{method:'DELETE'});
-  toast('Foto removida.'); await loadPhotos(); renderPhotosGrid();
+async function updateCaption(id, caption) {
+  try {
+    await sb(`photos?id=eq.${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: { caption },
+      prefer: 'return=minimal'
+    });
+    const p = photos.find(p => p.id === id);
+    if (p) p.caption = caption;
+  } catch (e) {
+    console.error('Erro ao salvar legenda:', e);
+    toast('Erro ao salvar legenda.');
+  }
+}
+ 
+async function movePhoto(id, idx, dir) {
+  const j = idx + dir;
+  if (j < 0 || j >= photos.length) return;
+  const other = photos[j];
+  try {
+    await sb(`photos?id=eq.${encodeURIComponent(id)}`, { method: 'PATCH', body: { position: j }, prefer: 'return=minimal' });
+    await sb(`photos?id=eq.${encodeURIComponent(other.id)}`, { method: 'PATCH', body: { position: idx }, prefer: 'return=minimal' });
+    [photos[idx], photos[j]] = [photos[j], photos[idx]];
+    renderPhotoGrid();
+  } catch (e) {
+    toast('Erro ao reordenar: ' + e.message);
+  }
+}
+ 
+async function removePhoto(id, src) {
+  if (!confirm('Remover esta foto?')) return;
+  try {
+    await sb(`photos?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+    // Tenta apagar do Storage (ignora erro se falhar)
+    try {
+      const storagePrefix = `/storage/v1/object/public/${BUCKET}/`;
+      const storagePath = decodeURIComponent(src.split(storagePrefix)[1]?.split('?')[0] || src.split('/').pop().split('?')[0]);
+      await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${storagePath}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+    } catch(e) { /* ignora */ }
+    await loadPhotos();
+    renderPhotoGrid();
+    toast('Foto removida.');
+  } catch (e) {
+    toast('Erro ao remover foto: ' + e.message);
+  }
+}
+ 
+// ─── ADMIN: SETTINGS ──────────────────────────────────────────────────────────
+function populateSettingsForm() {
+  applyActiveInviteSettings();
+  document.getElementById('retro-title').value = settings.title || '';
+  document.getElementById('retro-author').value = settings.author || '';
+  const dur = parseInt(settings.duration) || 6;
+  document.getElementById('slide-duration').value = dur;
+  document.getElementById('duration-out').textContent = dur + 's';
 }
  
 async function saveAllSettings() {
-  if(!activeInvite) return;
-  const code = activeInvite.code;
-  
-  const settingsToSave = [
-    { key: `invite:${code}:title`, value: document.getElementById('f-title').value },
-    { key: `invite:${code}:author`, value: document.getElementById('f-author').value },
-    { key: `invite:${code}:music`, value: document.getElementById('f-music').value },
-    { key: `invite:${code}:date`, value: document.getElementById('f-date').value },
-    { key: `invite:${code}:message`, value: document.getElementById('f-message').value }
+  const newTitle = document.getElementById('retro-title').value.trim();
+  const newAuthor = document.getElementById('retro-author').value.trim();
+  const newDuration = parseInt(document.getElementById('slide-duration').value);
+ 
+  const updates = [
+    { key: 'title', value: newTitle || 'Nossa Retrospectiva' },
+    { key: 'author', value: newAuthor || 'Uma coleção especial' },
+    { key: 'duration', value: String(newDuration) }
   ];
-
+ 
   try {
-    for (const item of settingsToSave) {
-      await sb(`settings?key=eq.${item.key}`, { method: 'DELETE' });
+    const targetCode = activeInvite ? getInviteKey(activeInvite.code) : null;
+    for (const u of updates) {
+      const key = targetCode ? `invite:${targetCode}:${u.key}` : u.key;
+      await upsertSetting(key, u.value);
+      settings[u.key] = u.value;
     }
-    
-    for (const item of settingsToSave) {
-      await sb('settings', {
-        method: 'POST',
-        body: item
-      });
-    }
-    
-    toast('Configurações salvas com sucesso!');
-    await loadSettings();
-  } catch (err) {
-    console.error(err);
-    toast('Erro ao salvar as configurações.', '#ff4b91');
+    if (targetCode) inviteSettings[targetCode] = { ...inviteSettings[targetCode], title: settings.title, author: settings.author, duration: String(newDuration) };
+    settings.duration = newDuration;
+    toast(activeInvite ? `✅ Configurações do convite ${activeInvite.code} salvas!` : '✅ Configurações salvas!');
+  } catch (e) {
+    toast('Erro ao salvar: ' + e.message);
+    console.error(e);
   }
 }
+
+async function upsertSetting(key, value) {
+  await sb(`settings?key=eq.${encodeURIComponent(key)}`, {
+    method: 'PATCH',
+    body: { value },
+    prefer: 'return=minimal'
+  });
+  try {
+    await sb('settings', {
+      method: 'POST',
+      body: { key, value },
+      prefer: 'return=minimal'
+    });
+  } catch (e) {
+    if (!String(e.message).includes('duplicate')) throw e;
+  }
+}
+ 
+async function changeAdminPwd() {
+  const val = document.getElementById('admin-password').value.trim();
+  if (!val || val.length < 4) { toast('Senha precisa ter pelo menos 4 caracteres.'); return; }
+  try {
+    await sb('settings?key=eq.admin_password', {
+      method: 'PATCH',
+      body: { value: val },
+      prefer: 'return=minimal'
+    });
+    settings.admin_password = val;
+    document.getElementById('admin-password').value = '';
+    toast('✅ Senha alterada com sucesso!');
+  } catch (e) {
+    toast('Erro ao alterar senha: ' + e.message);
+  }
+}
+ 
+// ─── PLAYER ────────────────────────────────────────────────────────────────────
+function exitPlayer() {
+  isPlaying = false;
+  stopTimer();
+  if (isAdmin) {
+    switchScreen('admin-screen');
+  } else {
+    logout();
+  }
+}
+ 
+async function goPlayer() {
+  setLoading('Carregando retrospectiva...');
+  switchScreen('loading-screen');
+  try {
+    await loadSettings();
+    if (!activeInvite && currentInviteCode) {
+      await loadInvites();
+      setActiveInvite(invites.find(inv => inv.code === currentInviteCode) || null);
+    }
+    if (!activeInvite) {
+      toast('Selecione um convite antes de ver a retrospectiva.');
+      switchScreen(isAdmin ? 'admin-screen' : 'invite-screen');
+      return;
+    }
+    applyActiveInviteSettings();
+    await loadPhotos();
+    switchScreen('player-screen');
+    initPlayer();
+  } catch (e) {
+    console.error('Erro ao entrar no player:', e);
+    toast('Erro ao carregar retrospectiva: ' + e.message);
+    switchScreen('invite-screen');
+  }
+}
+ 
+function initPlayer() {
+  document.getElementById('player-brand-title').textContent = settings.title || 'Retrô';
+  document.getElementById('speed-btn').textContent = (settings.duration || 6) + 's';
+ 
+  if (!photos.length) {
+    document.getElementById('player-empty').style.display = 'flex';
+    document.getElementById('player-content').style.display = 'none';
+    return;
+  }
+  document.getElementById('player-empty').style.display = 'none';
+  document.getElementById('player-content').style.display = 'flex';
+ 
+  playOrder = photos.map((_, i) => i);
+  buildShuffledOrder();
+  currentIndex = 0;
+  updateThumbRow();
+  showPhoto(0);
+}
+ 
+function buildShuffledOrder() {
+  shuffledOrder = [...playOrder].sort(() => Math.random() - 0.5);
+}
+ 
+function getOrder() { return isShuffle ? shuffledOrder : playOrder; }
+ 
+function showPhoto(idx) {
+  if (!photos.length) return;
+  const order = getOrder();
+  const realIdx = order[idx % order.length];
+  const photo = photos[realIdx];
+  if (!photo) return;
+ 
+  const art = document.getElementById('album-art');
+  art.classList.add('fade');
+  setTimeout(() => {
+    art.src = photo.src;
+    art.style.display = 'block';
+    document.getElementById('album-placeholder').style.display = 'none';
+    art.classList.remove('fade');
+  }, 240);
+ 
+  document.getElementById('player-bg').style.backgroundImage = `url("${String(photo.src).replace(/"/g, '\\"')}")`;
+  document.getElementById('track-title').textContent = photo.name || `Foto ${realIdx + 1}`;
+  document.getElementById('track-caption').textContent = photo.caption || settings.author || '';
+  document.getElementById('photo-counter').textContent = `${idx + 1} de ${photos.length}`;
+ 
+  const heart = document.getElementById('heart-btn');
+  heart.textContent = photo.liked ? '♥' : '♡';
+  heart.classList.toggle('liked', !!photo.liked);
+  document.getElementById('fullscreen-img-btn').style.display = 'block';
+ 
+  updateDots(idx);
+  updateThumbActive(realIdx);
+  updateTimerDisplay();
+  resetProgress();
+}
+ 
+function updateDots(activeIdx) {
+  const max = Math.min(photos.length, 20);
+  document.getElementById('dots-wrap').innerHTML = Array.from({ length: max }, (_, i) => `
+    <div class="dot ${i === activeIdx % max ? 'active' : ''}" onclick="jumpTo(${i})"></div>
+  `).join('');
+}
+ 
+function jumpTo(i) {
+  currentIndex = i;
+  showPhoto(currentIndex);
+  if (isPlaying) resetTimer();
+}
+ 
+function updateThumbRow() {
+  const row = document.getElementById('thumb-row');
+  if (!photos.length) { row.innerHTML = ''; return; }
+  row.innerHTML = photos.map((p, i) => `
+    <div class="thumb-item" id="thumb-${i}" onclick="jumpToReal(${i})">
+      <img src="${escapeAttr(p.src)}" alt="${escapeAttr(p.name || 'foto')}" loading="lazy">
+    </div>
+  `).join('');
+  updateThumbActive(getOrder()[currentIndex % photos.length]);
+}
+ 
+function updateThumbActive(realIdx) {
+  document.querySelectorAll('.thumb-item').forEach((t, i) => t.classList.toggle('active', i === realIdx));
+  const el = document.getElementById(`thumb-${realIdx}`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+}
+ 
+function jumpToReal(realIdx) {
+  const order = getOrder();
+  const idx = order.indexOf(realIdx);
+  currentIndex = idx !== -1 ? idx : realIdx;
+  showPhoto(currentIndex);
+  if (isPlaying) resetTimer();
+  updateThumbActive(realIdx);
+}
+ 
+// ─── PLAYBACK ──────────────────────────────────────────────────────────────────
+function togglePlay() {
+  isPlaying = !isPlaying;
+  document.getElementById('play-icon').innerHTML = isPlaying
+    ? '<path d="M6 19h4V5H6zm8-14v14h4V5z"/>'
+    : '<path d="M8 5v14l11-7z"/>';
+  if (isPlaying) {
+    startTimer();
+  } else {
+    stopTimer();
+  }
+}
+ 
+function startTimer() {
+  stopTimer();
+  progressInterval = setInterval(() => {
+    progressSec += 0.1;
+    const pct = (progressSec / settings.duration) * 100;
+    document.getElementById('prog-fill').style.width = Math.min(pct, 100) + '%';
+    document.getElementById('time-cur').textContent = formatTime(progressSec);
+    if (progressSec >= settings.duration) {
+      progressSec = 0;
+      isRepeat ? showPhoto(currentIndex) : nextPhoto();
+    }
+  }, 100);
+}
+ 
+function stopTimer() {
+  if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
+}
+ 
+function resetTimer() { if (isPlaying) { stopTimer(); startTimer(); } }
+function resetProgress() {
+  progressSec = 0;
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('time-cur').textContent = '0:00';
+}
+function updateTimerDisplay() {
+  document.getElementById('time-total').textContent = formatTime(settings.duration);
+}
+function formatTime(sec) {
+  const s = Math.floor(sec);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+ 
+function nextPhoto() {
+  currentIndex = (currentIndex + 1) % photos.length;
+  showPhoto(currentIndex);
+  if (isPlaying) { stopTimer(); startTimer(); }
+}
+ 
+function prevPhoto() {
+  currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+  showPhoto(currentIndex);
+  if (isPlaying) { stopTimer(); startTimer(); }
+}
+ 
+function toggleShuffle() {
+  isShuffle = !isShuffle;
+  document.getElementById('shuffle-btn').classList.toggle('active', isShuffle);
+  if (isShuffle) buildShuffledOrder();
+}
+ 
+function toggleRepeat() {
+  isRepeat = !isRepeat;
+  document.getElementById('repeat-btn').classList.toggle('active', isRepeat);
+}
+ 
+async function toggleLike() {
+  if (!photos.length) return;
+  const order = getOrder();
+  const realIdx = order[currentIndex % order.length];
+  const photo = photos[realIdx];
+  if (!photo) return;
+  photo.liked = !photo.liked;
+  const heart = document.getElementById('heart-btn');
+  heart.textContent = photo.liked ? '♥' : '♡';
+  heart.classList.toggle('liked', photo.liked);
+  try {
+    await sb(`photos?id=eq.${encodeURIComponent(photo.id)}`, {
+      method: 'PATCH',
+      body: { liked: photo.liked },
+      prefer: 'return=minimal'
+    });
+  } catch (e) { console.error('Erro ao salvar like:', e); }
+}
+ 
+function scrubProgress(e) {
+  const rect = document.getElementById('prog-track').getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  progressSec = pct * settings.duration;
+  document.getElementById('prog-fill').style.width = (pct * 100) + '%';
+  document.getElementById('time-cur').textContent = formatTime(progressSec);
+}
+ 
+function cycleSpeed() {
+  const speeds = [3, 6, 10, 15, 20];
+  const cur = speeds.indexOf(parseInt(settings.duration));
+  settings.duration = speeds[cur !== -1 ? (cur + 1) % speeds.length : 1];
+  document.getElementById('speed-btn').textContent = settings.duration + 's';
+  updateTimerDisplay();
+}
+ 
+// ─── FULLSCREEN ────────────────────────────────────────────────────────────────
+function openFullscreen() {
+  if (!photos.length) return;
+  const realIdx = getOrder()[currentIndex % photos.length];
+  document.getElementById('fullscreen-img').src = photos[realIdx].src;
+  document.getElementById('fullscreen-overlay').classList.add('visible');
+}
+function closeFullscreen() {
+  document.getElementById('fullscreen-overlay').classList.remove('visible');
+}
+ 
+// ─── KEYBOARD ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  const active = document.querySelector('.screen:not(.hidden)');
+  if (active?.id === 'invite-screen' && e.key === 'Enter') tryEnter();
+  if (active?.id !== 'player-screen') return;
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+  if (e.key === 'ArrowRight') nextPhoto();
+  if (e.key === 'ArrowLeft') prevPhoto();
+  if (e.key === 'f' || e.key === 'F') openFullscreen();
+  if (e.key === 'Escape') closeFullscreen();
+});
+ 
+// ─── TOUCH SWIPE ───────────────────────────────────────────────────────────────
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  if (!document.querySelector('#player-screen:not(.hidden)')) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 60) dx < 0 ? nextPhoto() : prevPhoto();
+});
 </script>
 </body>
 </html>
