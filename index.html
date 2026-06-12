@@ -131,6 +131,7 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
 <div id="loading-screen" class="screen"><div class="loader"></div><div style="font-size:13px;color:var(--text2);" id="loading-msg">Carregando dados...</div></div>
 <div id="toast"></div>
  
+<!-- TELA DE LOGIN -->
 <div id="invite-screen" class="screen hidden">
   <div class="invite-card">
     <div class="badge">Nossa Retrospectiva</div>
@@ -145,6 +146,7 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
   </div>
 </div>
  
+<!-- TELA DO ADMIN -->
 <div id="admin-screen" class="screen hidden">
   <div class="admin-wrap">
     <div class="admin-head">
@@ -155,6 +157,7 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
       </div>
     </div>
  
+    <!-- Gerenciar Perfis -->
     <div class="sec">
       <div class="sec-title">🔑 Perfis de Casais</div>
       <div class="card">
@@ -167,6 +170,7 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
       </div>
     </div>
  
+    <!-- Configurações de Dados -->
     <div class="sec">
       <div class="sec-title">⚙️ Informações da Retrospectiva</div>
       <div class="card">
@@ -182,6 +186,7 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
       </div>
     </div>
  
+    <!-- Upload e Organização das Imagens -->
     <div class="sec">
       <div class="sec-title">📸 Fotos (Arraste para mudar a ordem)</div>
       <div class="card">
@@ -195,6 +200,7 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
   </div>
 </div>
  
+<!-- TELA DO PLAYER (ESTILO STORIES) -->
 <div id="player-screen" class="screen hidden">
   <div id="player-bg"></div>
   <div class="player-wrap">
@@ -209,12 +215,14 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
     <div class="art-box">
       <img id="album-art" src="" alt="Foto de Capa">
  
+      <!-- Slide 1: Contador -->
       <div class="w-counter" id="w-counter">
         <div class="cnt-badge">Nosso Tempo Juntos</div>
         <div class="cnt-days" id="cnt-days">0 Dias</div>
         <div class="cnt-sub" id="cnt-sub">Conectados em cada momento.</div>
       </div>
  
+      <!-- Slide Final: Mensagem -->
       <div class="w-message" id="w-message">
         <div class="msg-lbl">Mensagem de Encerramento</div>
         <div class="msg-bubble" id="msg-text"></div>
@@ -250,10 +258,24 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
 const SUPABASE_URL = 'https://eromoiokvtnienjojson.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyb21vaW9rdnRuaWVuam9qc29uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NTQwMDQsImV4cCI6MjA5NjUzMDAwNH0.iqETV9HYsQx17GQ1BCo1Ui9-YKNJjZg3cnXtfN2hNOY';
  
+// FUNÇÃO DE REQUISIÇÃO ATUALIZADA E BLINDADA CONTRA ERRO DE API KEY
 async function sb(path, opts = {}) {
-  const h = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' };
+  const urlComChave = `${SUPABASE_URL}/rest/v1/${path}${path.includes('?') ? '&' : '?'}apikey=${SUPABASE_KEY}`;
+  
+  const h = { 
+    'apikey': SUPABASE_KEY, 
+    'Authorization': `Bearer ${SUPABASE_KEY}`, 
+    'Content-Type': 'application/json' 
+  };
+  
   if (opts.prefer) h['Prefer'] = opts.prefer;
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: h, method: opts.method || 'GET', body: opts.body ? JSON.stringify(opts.body) : undefined });
+  
+  const res = await fetch(urlComChave, { 
+    headers: h, 
+    method: opts.method || 'GET', 
+    body: opts.body ? JSON.stringify(opts.body) : undefined 
+  });
+  
   const txt = await res.text();
   try { return txt ? JSON.parse(txt) : null; } catch { return null; }
 }
@@ -296,11 +318,17 @@ function applySettings() {
  
 async function loadInvites() { invites = await sb('invites?select=*') || []; }
  
+// FUNÇÃO ATUALIZADA PARA EXTRAÇÃO LIMPA DAS FOTOS POR FILTRO DE CÓDIGO
 async function loadPhotos() {
   if (!activeInvite) return;
-  // Carrega garantindo que a ordem de 'position' seja estritamente respeitada
-  const all = await sb('photos?select=*&order=position.asc,created_at.asc') || [];
-  photos = all.filter(p => p.invite_code === activeInvite.code);
+  try {
+    const all = await sb(`photos?invite_code=eq.${activeInvite.code}`) || [];
+    photos = all.sort((a, b) => (a.position || 0) - (b.position || 0));
+    console.log("Fotos carregadas para o perfil:", photos);
+  } catch (err) {
+    console.error("Erro ao buscar fotos:", err);
+    photos = [];
+  }
 }
  
 function switchScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
@@ -491,7 +519,7 @@ async function selectProfile(code) {
   await loadPhotos(); renderPhotosGrid();
 }
  
-// ── INTERFACE DE DRAG-AND-DROP (ARRASTAR E SOLTAR FOTOS) ──
+// INTERFACE DE DRAG-AND-DROP (ARRASTAR E SOLTAR FOTOS)
 let dragSrc = null;
  
 function renderPhotosGrid() {
@@ -619,15 +647,12 @@ async function saveAllSettings() {
   ];
 
   try {
-    // Remove registros passados para evitar duplicações
     for (const item of settingsToSave) {
       await sb(`settings?key=eq.${item.key}`, { method: 'DELETE' });
     }
-    // Escreve os novos valores limpos
     for (const item of settingsToSave) {
       await sb('settings', { method: 'POST', body: item });
     }
-    
     toast('Configurações salvas com sucesso!');
     await loadSettings();
   } catch (err) {
