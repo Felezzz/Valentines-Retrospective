@@ -4,296 +4,251 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Retrospectiva</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #121212; --surface: #181818; --surface2: #282828;
-    --spotify-green: #1DB954; --spotify-green-hover: #1ed760;
-    --border: rgba(255,255,255,0.1); --text: #ffffff; --text2: #b3b3b3;
-    --radius: 8px; --radius-lg: 12px;
-    --wrapped-pink: #ff4b91; --wrapped-yellow: #ffcd38;
-    --wrapped-orange: #ff763b; --wrapped-blue: #1d75ff;
-  }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
-  h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: -0.03em; }
-  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); z-index: 10; }
-  .screen.hidden { opacity: 0; pointer-events: none; transform: scale(1.03) translateY(20px); }
-  #loading-screen { background: #000; flex-direction: column; gap: 20px; }
-  .spotify-loader { width: 50px; height: 50px; border: 4px solid var(--surface2); border-top-color: var(--spotify-green); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-msg { font-size: 14px; color: var(--text2); font-weight: 500; }
-  #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--wrapped-blue); border-radius: 4px; padding: 12px 24px; font-size: 14px; font-weight: bold; color: white; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  #invite-screen { background: linear-gradient(135deg, #1e0034 0%, #000000 100%); flex-direction: column; }
-  .invite-card { background: transparent; text-align: center; width: 440px; max-width: 90vw; padding: 20px; }
-  .wrapped-badge { display: inline-block; background: var(--spotify-green); color: #000; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px; letter-spacing: 0.1em; }
-  .invite-title { font-size: 42px; line-height: 1.1; margin-bottom: 16px; text-transform: uppercase; color: var(--wrapped-yellow); }
-  .invite-subtitle { font-size: 16px; color: var(--text2); margin-bottom: 32px; font-weight: 400; line-height: 1.5; }
-  .invite-input { width: 100%; background: var(--surface2); border: 2px solid transparent; border-radius: 50px; padding: 16px 24px; font-size: 16px; font-weight: 600; color: var(--text); text-align: center; outline: none; transition: all 0.2s; margin-bottom: 16px; }
-  .invite-input:focus { border-color: white; background: #333; }
-  .spotify-btn { width: 100%; background: var(--spotify-green); border: none; border-radius: 50px; padding: 16px; font-size: 16px; font-weight: 700; color: #000; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; }
-  .spotify-btn:hover { background: var(--spotify-green-hover); transform: scale(1.03); }
-  .invite-footer { font-size: 13px; color: var(--text2); margin-top: 32px; }
-  #admin-screen { background: #121212; align-items: flex-start; overflow-y: auto; }
-  .admin-wrap { width: 850px; max-width: 96vw; padding: 40px 20px; margin: 0 auto; }
-  .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
-  .admin-logo { font-size: 24px; color: #fff; }
-  .admin-logo span { color: var(--spotify-green); }
-  .admin-section { margin-bottom: 40px; }
-  .admin-section-title { font-size: 18px; color: #fff; margin-bottom: 16px; border-left: 4px solid var(--spotify-green); padding-left: 10px; }
-  .admin-card { background: var(--surface); border-radius: var(--radius-lg); padding: 24px; }
-  .invite-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-  .invite-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--surface2); border-radius: var(--radius); cursor: pointer; }
-  .invite-item:hover { background: #333; }
-  .invite-code { font-weight: 700; color: var(--spotify-green); }
-  .btn-delete { background: none; border: none; color: #ff5555; cursor: pointer; font-size: 14px; font-weight: bold; }
-  .add-invite-row { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
-  .add-invite-row input, .admin-card input[type="text"], .admin-card input[type="date"] { flex: 1; min-width: 150px; background: var(--surface2); border: 1px solid transparent; border-radius: 4px; padding: 12px; color: #fff; outline: none; font-family: inherit; }
-  .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin-top: 16px; }
-  .photo-thumb-wrap { position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden; background: #000; }
-  .photo-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
-  .photo-thumb-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
-  .photo-thumb-wrap:hover .photo-thumb-overlay { opacity: 1; }
-  .photo-thumb-overlay button { background: #ff4b91; border: none; color: white; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
-  .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media(max-width: 600px){ .config-grid { grid-template-columns: 1fr; } }
-  .input-block { display: flex; flex-direction: column; gap: 6px; }
-  .input-block label { font-size: 13px; color: var(--text2); font-weight: 600; }
-  .admin-card textarea { background: var(--surface2); border: none; border-radius: 4px; padding: 12px; color: white; height: 80px; resize: none; font-family: inherit; outline: none; width: 100%; }
-  /* ── PLAYER SCREEN ── */
-  #player-screen {
-    background: #121212;
-    flex-direction: column;
-    padding: 0;
-    overflow: hidden;
-  }
-  /* Fundo desfocado dinâmico — mesma foto, escurecida */
-  #player-bg {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    filter: blur(60px) brightness(0.35) saturate(1.4);
-    transform: scale(1.15);
-    transition: background-image 0.8s ease;
-    z-index: 0;
-  }
-  .player-container {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    justify-content: space-between;
-    padding: 20px 20px 28px;
-  }
-  .story-progress-container { display: flex; gap: 4px; width: 100%; padding: 10px 0; }
-  .story-bar-bg { flex: 1; height: 3px; background: rgba(255,255,255,0.25); border-radius: 2px; overflow: hidden; }
-  .story-bar-fill { height: 100%; width: 0%; background: #fff; transition: none; }
-  .player-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 5px; }
-  .context-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.7); font-weight: 700; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #121212; --surface: #181818; --surface2: #282828;
+  --green: #1DB954; --green2: #1ed760;
+  --border: rgba(255,255,255,0.1); --text: #fff; --text2: #b3b3b3;
+  --pink: #ff4b91; --yellow: #ffcd38; --orange: #ff763b; --blue: #1d75ff;
+}
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
+h1,h2,h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: -0.03em; }
  
-  /* ── ALBUM ART BOX ── */
-  .center-content-box {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.75);
-    margin: 16px 0;
-    background: #282828;
-    flex-shrink: 0;
-  }
-  /* Foto principal — transição suave entre fotos */
-  .spotify-art {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    z-index: 1;
-  }
-  .spotify-art.visible { opacity: 1; }
+/* ── SCREENS ── */
+.screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity .5s, transform .5s; z-index: 10; }
+.screen.hidden { opacity: 0; pointer-events: none; transform: scale(1.03) translateY(16px); }
  
-  /* Widgets sobre a capa */
-  .wrapped-counter-widget {
-    position: absolute; inset: 0;
-    background: linear-gradient(160deg, #c4005c 0%, #4a0e4e 100%);
-    display: none; flex-direction: column; align-items: center; justify-content: center;
-    padding: 30px; text-align: center; color: white;
-    z-index: 2;
-    animation: fadeInScale 0.4s ease;
-  }
-  .wrapped-counter-widget.active { display: flex; }
-  .counter-badge { background: #fff; color: #000; font-size: 11px; font-weight: 900; padding: 4px 12px; border-radius: 20px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.08em; }
-  .counter-big-text { font-size: 52px; line-height: 1; color: var(--wrapped-yellow); margin-bottom: 10px; }
-  .counter-sub { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.9); line-height: 1.5; }
+/* ── LOADING ── */
+#loading-screen { background:#000; flex-direction:column; gap:20px; }
+.loader { width:48px;height:48px;border:4px solid var(--surface2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
  
-  .wrapped-message-widget {
-    position: absolute; inset: 0;
-    background: linear-gradient(145deg, #003d61 0%, #c45000 100%);
-    display: none; flex-direction: column; justify-content: center;
-    padding: 28px; text-align: left;
-    z-index: 2;
-    animation: fadeInScale 0.4s ease;
-    overflow-y: auto;
-  }
-  .wrapped-message-widget.active { display: flex; }
-  .msg-bubble {
-    background: rgba(0,0,0,0.35);
-    padding: 20px; border-radius: 10px;
-    font-size: 15px; font-style: italic; line-height: 1.7; color: #fff;
-    border-left: 4px solid var(--wrapped-yellow);
-    margin-top: 14px;
-  }
-  @keyframes fadeInScale {
-    from { opacity: 0; transform: scale(0.96); }
-    to   { opacity: 1; transform: scale(1); }
-  }
+/* ── TOAST ── */
+#toast { position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--blue);border-radius:6px;padding:10px 22px;font-size:13px;font-weight:700;color:#fff;opacity:0;transition:all .3s;pointer-events:none;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.5); }
+#toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
  
-  /* ── METADATA + CONTROLS ── */
-  .meta-container { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .meta-text { display: flex; flex-direction: column; max-width: 85%; }
-  .meta-title { font-size: 22px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .meta-author { font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* ── INVITE ── */
+#invite-screen { background:linear-gradient(135deg,#1e0034,#000); flex-direction:column; }
+.invite-card { text-align:center;width:420px;max-width:90vw;padding:20px; }
+.badge { display:inline-block;background:var(--green);color:#000;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:900;text-transform:uppercase;padding:4px 10px;border-radius:4px;margin-bottom:14px;letter-spacing:.1em; }
+.invite-title { font-size:40px;line-height:1.1;margin-bottom:14px;text-transform:uppercase;color:var(--yellow); }
+.invite-sub { font-size:15px;color:var(--text2);margin-bottom:28px;line-height:1.5; }
+.round-input { width:100%;background:var(--surface2);border:2px solid transparent;border-radius:50px;padding:15px 22px;font-size:15px;font-weight:600;color:#fff;text-align:center;outline:none;transition:all .2s;margin-bottom:14px; }
+.round-input:focus { border-color:#fff;background:#333; }
+.btn-green { width:100%;background:var(--green);border:none;border-radius:50px;padding:15px;font-size:15px;font-weight:700;color:#000;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.05em; }
+.btn-green:hover { background:var(--green2);transform:scale(1.02); }
  
-  .spotify-progress-wrapper { width: 100%; margin-bottom: 18px; }
-  .spotify-track-line { height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; width: 100%; position: relative; cursor: pointer; }
-  .spotify-track-line:hover { height: 6px; }
-  .spotify-track-fill { height: 100%; background: #fff; width: 0%; border-radius: 2px; transition: none; }
-  .spotify-time-labels { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+/* ── ADMIN ── */
+#admin-screen { background:var(--bg);align-items:flex-start;overflow-y:auto; }
+.admin-wrap { width:860px;max-width:96vw;padding:36px 20px;margin:0 auto; }
+.admin-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;border-bottom:1px solid var(--border);padding-bottom:18px; }
+.admin-logo { font-size:22px; } .admin-logo span { color:var(--green); }
+.sec { margin-bottom:36px; }
+.sec-title { font-size:17px;color:#fff;margin-bottom:14px;border-left:4px solid var(--green);padding-left:10px; }
+.card { background:var(--surface);border-radius:12px;padding:22px; }
+.invite-list { list-style:none;display:flex;flex-direction:column;gap:8px; }
+.invite-item { display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:var(--surface2);border-radius:8px;cursor:pointer;transition:background .15s; }
+.invite-item:hover,.invite-item.selected { background:#333; }
+.invite-item.selected { border-left:3px solid var(--green); }
+.inv-code { font-weight:700;color:var(--green); }
+.btn-del { background:none;border:none;color:#ff5555;cursor:pointer;font-size:13px;font-weight:700; }
+.row { display:flex;gap:10px;margin-top:14px;flex-wrap:wrap; }
+.row input,.card input[type=text],.card input[type=date] { flex:1;min-width:140px;background:var(--surface2);border:1px solid transparent;border-radius:6px;padding:11px;color:#fff;outline:none;font-family:inherit;font-size:14px; }
+.cfg-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+@media(max-width:580px){ .cfg-grid { grid-template-columns:1fr; } }
+.iblk { display:flex;flex-direction:column;gap:5px; }
+.iblk label { font-size:12px;color:var(--text2);font-weight:600; }
+.card textarea { background:var(--surface2);border:none;border-radius:6px;padding:11px;color:#fff;height:76px;resize:none;font-family:inherit;outline:none;width:100%;font-size:14px; }
  
-  .spotify-controls-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 6px; margin-bottom: 8px; }
-  .icon-btn { background: none; border: none; color: rgba(255,255,255,0.55); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
-  .icon-btn:hover { color: #fff; }
-  .icon-btn.active { color: var(--spotify-green); }
-  .master-play-btn { background: #fff; border: none; width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: transform 0.15s; }
-  .master-play-btn:hover { transform: scale(1.07); }
-  .master-play-btn svg { fill: #000; width: 24px; height: 24px; }
+/* ── PHOTO GRID (reordenável) ── */
+.photo-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:14px; }
+.photo-thumb { position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#111;cursor:grab;border:2px solid transparent;transition:border-color .2s,transform .2s,opacity .2s; }
+.photo-thumb:active { cursor:grabbing; }
+.photo-thumb.drag-over { border-color:var(--green);transform:scale(1.05); }
+.photo-thumb.dragging { opacity:.4; }
+.photo-thumb img { width:100%;height:100%;object-fit:cover;pointer-events:none; }
+.photo-num { position:absolute;top:5px;left:6px;background:rgba(0,0,0,.75);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px; }
+.photo-overlay { position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s; }
+.photo-thumb:hover .photo-overlay { opacity:1; }
+.photo-overlay button { background:#ff4b91;border:none;color:#fff;padding:5px 11px;border-radius:4px;font-weight:700;cursor:pointer;font-size:12px; }
+.drag-hint { font-size:12px;color:var(--text2);margin-bottom:6px; }
+ 
+/* ── PLAYER ── */
+#player-screen { background:#121212;flex-direction:column;padding:0;overflow:hidden; }
+#player-bg { position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(70px) brightness(.3) saturate(1.5);transform:scale(1.2);transition:background-image .6s;z-index:0; }
+.player-wrap { position:relative;z-index:1;width:100%;max-width:420px;display:flex;flex-direction:column;height:100%;justify-content:space-between;padding:18px 18px 26px; }
+ 
+/* Story bars */
+.bars { display:flex;gap:4px;width:100%;padding:8px 0; }
+.bar-bg { flex:1;height:3px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden; }
+.bar-fill { height:100%;width:0%;background:#fff; }
+ 
+.p-header { display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:4px; }
+.p-ctx { font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.6);font-weight:700; }
+ 
+/* Album art box */
+.art-box { position:relative;width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8);margin:14px 0;background:#1a1a1a;flex-shrink:0; }
+ 
+/* A imagem começa invisível e fica visível via JS */
+#album-art { width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity .45s ease;z-index:1; }
+ 
+/* Widgets — display:none por padrão, JS adiciona .on para mostrar */
+.w-counter,.w-message {
+  position:absolute;inset:0;z-index:2;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:28px;animation:pop .35s ease;
+}
+.w-counter.on,.w-message.on { display:flex; }
+.w-counter { background:linear-gradient(155deg,#c4005c,#4a0e4e);text-align:center; }
+.w-message { background:linear-gradient(145deg,#003d61,#c45000);align-items:flex-start;justify-content:center;overflow-y:auto; }
+@keyframes pop { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+ 
+.cnt-badge { background:#fff;color:#000;font-size:11px;font-weight:900;padding:4px 12px;border-radius:20px;margin-bottom:18px;text-transform:uppercase;letter-spacing:.08em; }
+.cnt-days { font-size:54px;line-height:1;color:var(--yellow);margin-bottom:8px; }
+.cnt-sub { font-size:14px;font-weight:500;color:rgba(255,255,255,.9);line-height:1.5; }
+.msg-lbl { display:inline-block;background:var(--yellow);color:#000;font-size:11px;font-weight:900;padding:4px 10px;border-radius:4px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em; }
+.msg-bubble { background:rgba(0,0,0,.35);padding:18px;border-radius:10px;font-size:14px;font-style:italic;line-height:1.7;color:#fff;border-left:4px solid var(--yellow);width:100%; }
+ 
+/* Meta */
+.meta { width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px; }
+.meta-text { display:flex;flex-direction:column;max-width:85%; }
+.meta-title { font-size:21px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.meta-author { font-size:13px;color:rgba(255,255,255,.55);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+ 
+/* Progress */
+.prog-wrap { width:100%;margin-bottom:16px; }
+.prog-track { height:4px;background:rgba(255,255,255,.18);border-radius:2px;cursor:pointer;position:relative; }
+.prog-fill { height:100%;background:#fff;width:0%;border-radius:2px; }
+.prog-times { display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.45);margin-top:5px; }
+ 
+/* Controls */
+.controls { display:flex;align-items:center;justify-content:space-between;width:100%;padding:0 4px;margin-bottom:6px; }
+.ibtn { background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s; }
+.ibtn:hover { color:#fff; }
+.play-btn { background:#fff;border:none;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.4);transition:transform .15s; }
+.play-btn:hover { transform:scale(1.06); }
 </style>
 </head>
 <body>
  
 <audio id="bg-music" loop crossorigin="anonymous"></audio>
-<div id="loading-screen" class="screen"><div class="spotify-loader"></div><div class="loading-msg" id="loading-msg">Carregando...</div></div>
+<div id="loading-screen" class="screen"><div class="loader"></div><div style="font-size:13px;color:var(--text2);font-weight:500" id="loading-msg">Carregando...</div></div>
 <div id="toast"></div>
  
+<!-- INVITE -->
 <div id="invite-screen" class="screen hidden">
   <div class="invite-card">
-    <div class="wrapped-badge">Nossa Retrospectiva</div>
+    <div class="badge">Nossa Retrospectiva</div>
     <h1 class="invite-title">Uma lembrança para o amor da minha vida</h1>
-    <p class="invite-subtitle">O amor tudo espera, tudo suporta...</p>
-    <input id="code-input" class="invite-input" type="text" placeholder="CÓDIGO DE ACESSO" maxlength="16">
-    <button class="spotify-btn" onclick="tryEnter()">Ouvir Agora</button>
-    <div id="error-msg" style="color:var(--wrapped-pink); font-size:14px; margin-top:12px; font-weight:bold;"></div>
-    <p class="invite-footer"><a href="#" onclick="promptAdmin()" style="color:var(--spotify-green); text-decoration:none; font-weight:bold;">Acessar Admin</a></p>
+    <p class="invite-sub">O amor tudo espera, tudo suporta...</p>
+    <input id="code-input" class="round-input" type="text" placeholder="CÓDIGO DE ACESSO" maxlength="16">
+    <button class="btn-green" onclick="tryEnter()">Ouvir Agora</button>
+    <div id="error-msg" style="color:var(--pink);font-size:13px;margin-top:10px;font-weight:700;"></div>
+    <p style="font-size:12px;color:var(--text2);margin-top:28px;">
+      <a href="#" onclick="promptAdmin()" style="color:var(--green);text-decoration:none;font-weight:700;">Acessar Admin</a>
+    </p>
   </div>
 </div>
  
+<!-- ADMIN -->
 <div id="admin-screen" class="screen hidden">
   <div class="admin-wrap">
-    <div class="admin-header">
+    <div class="admin-head">
       <div class="admin-logo"><b>Spotify</b> <span>Wrapped Admin</span></div>
-      <div style="display:flex; gap:10px;">
-        <button class="spotify-btn" onclick="goPlayer()" style="padding:8px 16px; font-size:12px;">Visualizar Player</button>
-        <button class="spotify-btn" onclick="logout()" style="padding:8px 16px; font-size:12px; background:#444; color:white;">Sair</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-green" onclick="goPlayer()" style="padding:8px 14px;font-size:12px;">▶ Visualizar</button>
+        <button class="btn-green" onclick="logout()" style="padding:8px 14px;font-size:12px;background:#444;color:#fff;">Sair</button>
       </div>
     </div>
  
-    <div class="admin-section">
-      <div class="admin-section-title">🔑 Perfis e Convites</div>
-      <div class="admin-card">
+    <div class="sec">
+      <div class="sec-title">🔑 Perfis e Convites</div>
+      <div class="card">
         <ul class="invite-list" id="invite-list"></ul>
-        <div class="add-invite-row">
-          <input id="new-code-input" type="text" placeholder="Código (ex: CASAL2026)">
-          <input id="new-name-input" type="text" placeholder="Nome do Casal / Convidado">
-          <button class="spotify-btn" onclick="addInvite()" style="width:auto; padding:0 20px;">+ Adicionar</button>
+        <div class="row">
+          <input id="new-code" type="text" placeholder="Código (ex: CASAL2026)">
+          <input id="new-name" type="text" placeholder="Nome do Casal">
+          <button class="btn-green" onclick="addInvite()" style="width:auto;padding:0 18px;">+ Adicionar</button>
         </div>
       </div>
     </div>
  
-    <div class="admin-section">
-      <div class="admin-section-title">⚙️ Configurações do Perfil Selecionado</div>
-      <div class="admin-card">
-        <p style="font-size:13px; color:var(--text2); margin-bottom:16px;" id="active-invite-msg">Selecione um convite acima para começar a configurar.</p>
-        <div class="config-grid">
-          <div class="input-block"><label>Título Principal do Álbum</label><input id="retro-title" type="text"></div>
-          <div class="input-block"><label>Subtítulo / Nome do Casal</label><input id="retro-author" type="text"></div>
-          <div class="input-block"><label>🎵 URL da Música (MP3 Direto)</label><input id="retro-music" type="text"></div>
-          <div class="input-block"><label>📅 Data de Início do Relacionamento</label><input id="retro-date" type="date"></div>
+    <div class="sec">
+      <div class="sec-title">⚙️ Configurações do Perfil</div>
+      <div class="card">
+        <p style="font-size:12px;color:var(--text2);margin-bottom:14px;" id="active-msg">Selecione um perfil acima.</p>
+        <div class="cfg-grid">
+          <div class="iblk"><label>Título do Álbum</label><input id="f-title" type="text"></div>
+          <div class="iblk"><label>Nome do Casal</label><input id="f-author" type="text"></div>
+          <div class="iblk"><label>🎵 URL da Música (MP3)</label><input id="f-music" type="text"></div>
+          <div class="iblk"><label>📅 Data de Início</label><input id="f-date" type="date"></div>
         </div>
-        <div class="input-block" style="margin-top:16px;"><label>✉️ Mensagem Final</label><textarea id="retro-message"></textarea></div>
-        <button class="spotify-btn" onclick="saveAllSettings()" style="margin-top:20px; background:white; color:black;">Salvar Dados do Perfil</button>
+        <div class="iblk" style="margin-top:14px;"><label>✉️ Mensagem Final</label><textarea id="f-message"></textarea></div>
+        <button class="btn-green" onclick="saveAllSettings()" style="margin-top:18px;background:#fff;color:#000;">💾 Salvar Perfil</button>
       </div>
     </div>
  
-    <div class="admin-section">
-      <div class="admin-section-title">📸 Imagens da Faixa (Slides da Retrospectiva)</div>
-      <div class="admin-card">
+    <div class="sec">
+      <div class="sec-title">📸 Fotos (arraste para reordenar)</div>
+      <div class="card">
         <input type="file" id="file-input" accept="image/*" multiple onchange="handleFiles(this.files)" style="display:none;">
-        <button class="spotify-btn" id="upload-btn" onclick="triggerUpload()" style="background:#333; color:white; margin-bottom:15px;">+ Enviar Fotos para o Perfil</button>
-        <div id="upload-status" style="font-size:13px; color:var(--text2); margin-bottom:10px; display:none;"></div>
+        <button class="btn-green" id="upload-btn" onclick="triggerUpload()" style="background:#333;color:#fff;margin-bottom:10px;">+ Enviar Fotos</button>
+        <div id="upload-status" style="font-size:12px;color:var(--text2);margin-bottom:8px;display:none;"></div>
+        <p class="drag-hint">💡 Arraste as fotos para mudar a ordem de exibição no player.</p>
         <div class="photo-grid" id="photo-grid"></div>
       </div>
     </div>
   </div>
 </div>
  
+<!-- PLAYER -->
 <div id="player-screen" class="screen hidden">
-  <!-- Fundo desfocado dinâmico -->
   <div id="player-bg"></div>
- 
-  <div class="player-container">
-    <div class="story-progress-container" id="story-progress-wrap"></div>
-    <div class="player-header">
-      <svg width="24" height="24" fill="white" viewBox="0 0 24 24" onclick="exitPlayer()" style="cursor:pointer;"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
-      <div class="context-title">NOSSA HISTÓRIA</div>
-      <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+  <div class="player-wrap">
+    <div class="bars" id="bars"></div>
+    <div class="p-header">
+      <svg width="22" height="22" fill="white" viewBox="0 0 24 24" onclick="exitPlayer()" style="cursor:pointer"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
+      <div class="p-ctx">Nossa História</div>
+      <svg width="22" height="22" fill="white" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
     </div>
  
-    <div class="center-content-box">
-      <!-- Foto da retrospectiva — capa de álbum -->
-      <img id="album-art" class="spotify-art" src="">
+    <div class="art-box">
+      <img id="album-art" src="" alt="">
  
-      <!-- Slide 0: Contador de dias -->
-      <div class="wrapped-counter-widget" id="counter-widget">
-        <div class="counter-badge">Nosso tempo</div>
-        <div class="counter-big-text" id="counter-days-count">0 Dias</div>
-        <div class="counter-sub" id="counter-breakdown">Conectados de corpo e alma.</div>
+      <div class="w-counter" id="w-counter">
+        <div class="cnt-badge">Nosso Tempo</div>
+        <div class="cnt-days" id="cnt-days">0 Dias</div>
+        <div class="cnt-sub" id="cnt-sub">Conectados de corpo e alma.</div>
       </div>
  
-      <!-- Último slide: Mensagem final -->
-      <div class="wrapped-message-widget" id="message-widget">
-        <div class="wrapped-badge" style="background:var(--wrapped-yellow); margin-bottom:0;">Sua Mensagem Final</div>
-        <div class="msg-bubble" id="final-msg-text"></div>
+      <div class="w-message" id="w-message">
+        <div class="msg-lbl">Sua Mensagem Final</div>
+        <div class="msg-bubble" id="msg-text"></div>
       </div>
     </div>
  
-    <div class="meta-container">
+    <div class="meta">
       <div class="meta-text">
-        <div class="meta-title" id="track-title">Carregando...</div>
-        <div class="meta-author" id="track-author">Seu Álbum</div>
+        <div class="meta-title" id="p-title">Carregando...</div>
+        <div class="meta-author" id="p-author"></div>
       </div>
     </div>
  
-    <div class="spotify-progress-wrapper">
-      <div class="spotify-track-line" onclick="scrubProgress(event)"><div class="spotify-track-fill" id="track-fill"></div></div>
-      <div class="spotify-time-labels"><span id="time-cur">0:00</span><span id="time-total">0:06</span></div>
+    <div class="prog-wrap">
+      <div class="prog-track" onclick="scrub(event)"><div class="prog-fill" id="prog-fill"></div></div>
+      <div class="prog-times"><span id="t-cur">0:00</span><span id="t-tot">0:06</span></div>
     </div>
  
-    <div class="spotify-controls-row">
-      <button class="icon-btn" id="shuffle-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
-      <button class="icon-btn" onclick="prevPhoto()"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
-      <button class="master-play-btn" onclick="togglePlay()"><span id="play-btn-svg-content"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000"><path d="M8 5v14l11-7z"/></svg></span></button>
-      <button class="icon-btn" onclick="nextPhoto()"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M18 6h-2v12h2zM5 18l11-6L5 6v12z"/></svg></button>
-      <button class="icon-btn" id="repeat-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v3h12v-6h-2v4z"/></svg></button>
+    <div class="controls">
+      <button class="ibtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
+      <button class="ibtn" onclick="prevSlide()"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+      <button class="play-btn" onclick="togglePlay()" id="play-btn">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="ibtn" onclick="nextSlide()"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M18 6h-2v12h2zM5 18l11-6L5 6v12z"/></svg></button>
+      <button class="ibtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v3h12v-6h-2v4z"/></svg></button>
     </div>
   </div>
 </div>
@@ -302,491 +257,372 @@
 const SUPABASE_URL = 'https://eromoiokvtnienjojson.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyb21vaW9rdnRuaWVuam9qc29uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NTQwMDQsImV4cCI6MjA5NjUzMDAwNH0.iqETV9HYsQx17GQ1BCo1Ui9-YKNJjZg3cnXtfN2hNOY';
  
-// ─── FIX 2: sb() corrigido — o Prefer agora usa o valor completo correto
 async function sb(path, opts = {}) {
-  const headers = {
-    'apikey': SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`,
-    'Content-Type': 'application/json'
-  };
-  if (opts.prefer) headers['Prefer'] = opts.prefer;
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    headers,
-    method: opts.method || 'GET',
-    body: opts.body ? JSON.stringify(opts.body) : undefined
-  });
-  const text = await res.text();
-  try { return text ? JSON.parse(text) : null; }
-  catch(e) { console.warn('Resposta não-JSON do Supabase:', text); return null; }
+  const h = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' };
+  if (opts.prefer) h['Prefer'] = opts.prefer;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: h, method: opts.method || 'GET', body: opts.body ? JSON.stringify(opts.body) : undefined });
+  const txt = await res.text();
+  try { return txt ? JSON.parse(txt) : null; } catch { return null; }
 }
  
-const DEFAULT_SETTINGS = { title: 'Nosso Wrapped', author: 'Memórias de Nós Dois', music: '', date: '', message: '', admin_password: 'admin123' };
-let baseSettings = { ...DEFAULT_SETTINGS };
-let inviteSettings = {};
-let settings = { ...DEFAULT_SETTINGS };
-let photos = [];
-let invites = [];
-let activeInvite = null;
-let currentIndex = 0;
-let isPlaying = false;
-let progressInterval = null;
-let counterRefreshInterval = null; // FIX 1: intervalo para atualizar o contador
-let progressSec = 0;
-const slideDuration = 6;
-const bgMusic = document.getElementById('bg-music');
+// ── STATE ──
+const DEF = { title:'Nosso Wrapped', author:'Memórias de Nós Dois', music:'', date:'', message:'', admin_password:'admin123' };
+let baseSettings = {...DEF}, inviteSettings = {}, settings = {...DEF};
+let photos = [], invites = [], activeInvite = null;
+let curIdx = 0, playing = false, progInterval = null, cntInterval = null, progSec = 0;
+const SLIDE_DUR = 6;
+const audio = document.getElementById('bg-music');
  
+// ── INIT ──
 window.addEventListener('DOMContentLoaded', async () => {
-  try {
-    await loadSettings();
-    await loadInvites();
-    switchScreen('invite-screen');
-  } catch(e) {
-    document.getElementById('loading-msg').textContent = 'Erro de inicialização.';
-    console.error(e);
-  }
+  try { await loadSettings(); await loadInvites(); switchScreen('invite-screen'); }
+  catch(e) { document.getElementById('loading-msg').textContent = 'Erro. Tente recarregar.'; }
 });
  
 async function loadSettings() {
   const rows = await sb('settings?select=key,value') || [];
-  baseSettings = { ...DEFAULT_SETTINGS };
-  inviteSettings = {};
+  baseSettings = {...DEF}; inviteSettings = {};
   rows.forEach(r => {
-    const match = String(r.key).match(/^invite:([^:]+):(title|author|music|date|message)$/);
-    if (match) {
-      const [, code, field] = match;
-      inviteSettings[code] = inviteSettings[code] || {};
-      inviteSettings[code][field] = r.value;
-    } else {
-      baseSettings[r.key] = r.value;
-    }
+    const m = String(r.key).match(/^invite:([^:]+):(title|author|music|date|message)$/);
+    if (m) { const [,c,f]=m; inviteSettings[c]=inviteSettings[c]||{}; inviteSettings[c][f]=r.value; }
+    else baseSettings[r.key] = r.value;
   });
   applySettings();
 }
  
 function applySettings() {
-  if (activeInvite && inviteSettings[activeInvite.code]) {
-    settings = { ...DEFAULT_SETTINGS, ...baseSettings, ...inviteSettings[activeInvite.code] };
-  } else {
-    settings = { ...DEFAULT_SETTINGS, ...baseSettings };
-  }
+  settings = activeInvite && inviteSettings[activeInvite.code]
+    ? {...DEF, ...baseSettings, ...inviteSettings[activeInvite.code]}
+    : {...DEF, ...baseSettings};
 }
  
 async function loadInvites() { invites = await sb('invites?select=*') || []; }
  
 async function loadPhotos() {
   if (!activeInvite) return;
-  const allPhotos = await sb('photos?select=*&order=position.asc,created_at.asc') || [];
-  photos = allPhotos.filter(p => p.invite_code === activeInvite.code);
+  const all = await sb('photos?select=*&order=position.asc,created_at.asc') || [];
+  photos = all.filter(p => p.invite_code === activeInvite.code);
 }
  
-function switchScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-}
+// ── SCREENS ──
+function switchScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+function toast(msg, bg) { const t=document.getElementById('toast'); t.style.background=bg||'var(--blue)'; t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
  
-function toast(msg, color) {
-  const t = document.getElementById('toast');
-  t.style.background = color || 'var(--wrapped-blue)';
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
- 
+// ── INVITE FLOW ──
 async function tryEnter() {
   const code = document.getElementById('code-input').value.trim().toUpperCase();
   const found = invites.find(i => i.code === code);
-  if (found) {
-    activeInvite = found;
-    switchScreen('loading-screen');
-    document.getElementById('loading-msg').textContent = 'Carregando sua retrospectiva...';
-    await loadSettings();
-    applySettings();
-    await loadPhotos();
-    if (settings.music) { bgMusic.src = settings.music; bgMusic.load(); }
-    else { bgMusic.removeAttribute('src'); }
-    goPlayer();
-  } else {
-    document.getElementById('error-msg').textContent = "Código incorreto.";
-  }
+  if (!found) { document.getElementById('error-msg').textContent = 'Código incorreto.'; return; }
+  activeInvite = found;
+  switchScreen('loading-screen');
+  document.getElementById('loading-msg').textContent = 'Carregando sua retrospectiva...';
+  await loadSettings(); applySettings(); await loadPhotos();
+  if (settings.music) { audio.src = settings.music; audio.load(); } else audio.removeAttribute('src');
+  goPlayer();
 }
  
+// ── PLAYER ──
 function goPlayer() {
   switchScreen('player-screen');
-  document.getElementById('track-author').textContent = settings.author;
-  if (photos.length === 0) {
-    photos = [{ src: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500', title: 'Nosso Álbum' }];
-  }
-  initPlayer();
+  if (!photos.length) photos = [{ id:'_demo', src:'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600', invite_code:'', position:0 }];
+  curIdx = 0; playing = false;
+  updatePlayBtn();
+  audio.pause();
+  buildBars();
+  showSlide(0);
 }
  
-function initPlayer() {
-  currentIndex = 0;
-  isPlaying = false;
-  updatePlayButtonUI();
-  bgMusic.pause();
-  buildStoryBars();
-  showSlide(currentIndex);
+function buildBars() {
+  const wrap = document.getElementById('bars'); wrap.innerHTML = '';
+  const total = photos.length + 2;
+  for (let i=0;i<total;i++) wrap.innerHTML += `<div class="bar-bg"><div class="bar-fill" id="b${i}"></div></div>`;
 }
  
-function buildStoryBars() {
-  const wrap = document.getElementById('story-progress-wrap');
-  wrap.innerHTML = '';
-  const totalSlides = photos.length + 2;
-  for (let i = 0; i < totalSlides; i++) {
-    wrap.innerHTML += `<div class="story-bar-bg"><div class="story-bar-fill" id="story-fill-${i}"></div></div>`;
-  }
+// ── RELATIONSHIP COUNTER ──
+function calcTime(dateStr) {
+  if (!dateStr) return { days:0, text:'Nenhuma data registrada' };
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const start = new Date(y, m-1, d);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const ms = today - start;
+  if (ms < 0) return { days:0, text:'Data no futuro' };
+  const days = Math.floor(ms / 86400000);
+  let yr = today.getFullYear()-start.getFullYear(), mo = today.getMonth()-start.getMonth(), da = today.getDate()-start.getDate();
+  if (da<0) { mo--; da += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); }
+  if (mo<0) { yr--; mo+=12; }
+  const p = [];
+  if (yr>0) p.push(`${yr} ${yr===1?'Ano':'Anos'}`);
+  if (mo>0) p.push(`${mo} ${mo===1?'Mês':'Meses'}`);
+  if (da>0||p.length===0) p.push(`${da} ${da===1?'Dia':'Dias'}`);
+  return { days, text: p.join(', ') + ' juntos.' };
+}
+function refreshCounter() {
+  const t = calcTime(settings.date);
+  document.getElementById('cnt-days').textContent = `${t.days} Dias`;
+  document.getElementById('cnt-sub').textContent = t.text;
 }
  
-// ─── FIX 1: Cálculo de tempo corrigido para usar UTC e evitar bug de fuso
-function calculateRelationshipTime(startDateStr) {
-  if (!startDateStr) return { days: 0, text: 'Nenhuma data registrada' };
- 
-  // Força interpretação como data local (sem deslocamento de fuso)
-  const [year, month, day] = startDateStr.split('-').map(Number);
-  const start = new Date(year, month - 1, day);
-  const now = new Date();
-  // Zera horas para comparação apenas de datas
-  const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
- 
-  const diffMs = nowDay - start;
-  if (diffMs < 0) return { days: 0, text: 'Data no futuro' };
- 
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
- 
-  let years = nowDay.getFullYear() - start.getFullYear();
-  let months = nowDay.getMonth() - start.getMonth();
-  let days = nowDay.getDate() - start.getDate();
- 
-  if (days < 0) {
-    months--;
-    days += new Date(nowDay.getFullYear(), nowDay.getMonth(), 0).getDate();
-  }
-  if (months < 0) { years--; months += 12; }
- 
-  const parts = [];
-  if (years > 0) parts.push(`${years} ${years === 1 ? 'Ano' : 'Anos'}`);
-  if (months > 0) parts.push(`${months} ${months === 1 ? 'Mês' : 'Meses'}`);
-  if (days > 0 || parts.length === 0) parts.push(`${days} ${days === 1 ? 'Dia' : 'Dias'}`);
- 
-  return { days: diffDays, text: parts.join(', ') + ' juntos.' };
-}
- 
-function updateCounterSlide() {
-  const timeData = calculateRelationshipTime(settings.date);
-  document.getElementById('counter-days-count').textContent = `${timeData.days} Dias`;
-  document.getElementById('counter-breakdown').textContent = timeData.text;
-}
- 
-function setAlbumArt(src) {
-  const img = document.getElementById('album-art');
-  const bg  = document.getElementById('player-bg');
-  // Crossfade: esconde, troca src, mostra
-  img.classList.remove('visible');
-  setTimeout(() => {
-    img.src = src;
-    img.onload = () => img.classList.add('visible');
-    // Fundo desfocado com a mesma imagem
-    bg.style.backgroundImage = `url('${src}')`;
-  }, 200);
-}
- 
+// ── SHOW SLIDE ── (aqui está a correção principal das fotos)
 function showSlide(idx) {
-  const totalSlides = photos.length + 2;
-  if (idx < 0) { currentIndex = 0; return; }
-  if (idx >= totalSlides) { currentIndex = totalSlides - 1; pauseSystem(); return; }
+  const total = photos.length + 2;
+  if (idx < 0) { curIdx = 0; return; }
+  if (idx >= total) { curIdx = total-1; pause(); return; }
  
-  clearInterval(counterRefreshInterval);
-  counterRefreshInterval = null;
+  clearInterval(cntInterval); cntInterval = null;
  
-  // Oculta todos os widgets
-  document.getElementById('counter-widget').classList.remove('active');
-  document.getElementById('message-widget').classList.remove('active');
-  document.getElementById('album-art').style.visibility = 'visible';
+  // Oculta tudo primeiro
+  const artEl   = document.getElementById('album-art');
+  const counter = document.getElementById('w-counter');
+  const message = document.getElementById('w-message');
+  counter.classList.remove('on');
+  message.classList.remove('on');
+  artEl.style.opacity = '0';
  
-  // Atualiza barras de progresso
-  for (let i = 0; i < totalSlides; i++) {
-    const f = document.getElementById(`story-fill-${i}`);
-    if (f) f.style.width = i < idx ? '100%' : '0%';
-  }
+  // Atualiza barras
+  const total2 = photos.length + 2;
+  for (let i=0; i<total2; i++) { const b=document.getElementById(`b${i}`); if(b) b.style.width = i<idx?'100%':'0%'; }
+ 
+  // Reset progresso
+  progSec = 0;
+  document.getElementById('t-tot').textContent = `0:${String(SLIDE_DUR).padStart(2,'0')}`;
+  document.getElementById('t-cur').textContent = '0:00';
+  document.getElementById('prog-fill').style.width = '0%';
  
   if (idx === 0) {
-    // Slide de contador — fundo rosa, sem foto
-    document.getElementById('album-art').style.visibility = 'hidden';
-    document.getElementById('album-art').classList.remove('visible');
-    document.getElementById('player-bg').style.backgroundImage = 'linear-gradient(160deg, #c4005c, #4a0e4e)';
-    document.getElementById('counter-widget').classList.add('active');
-    updateCounterSlide();
-    counterRefreshInterval = setInterval(updateCounterSlide, 1000);
-    document.getElementById('track-title').textContent = settings.title || 'Nosso Wrapped';
-    document.getElementById('track-author').textContent = settings.author || '';
-  }
-  else if (idx === totalSlides - 1) {
-    // Último slide — mensagem final
-    document.getElementById('album-art').style.visibility = 'hidden';
-    document.getElementById('album-art').classList.remove('visible');
-    document.getElementById('player-bg').style.backgroundImage = 'linear-gradient(145deg, #003d61, #c45000)';
-    document.getElementById('message-widget').classList.add('active');
-    document.getElementById('final-msg-text').textContent = settings.message || "Fim da retrospectiva!";
-    document.getElementById('track-title').textContent = "Fim ❤️";
-    document.getElementById('track-author').textContent = settings.author || '';
-  }
-  else {
-    // Foto da retrospectiva — exibe como capa de álbum
-    const photo = photos[idx - 1];
-    document.getElementById('album-art').style.visibility = 'visible';
-    setAlbumArt(photo.src);
-    document.getElementById('track-title').textContent = photo.title || `Momento ${idx}`;
-    document.getElementById('track-author').textContent = settings.author || '';
-  }
+    // Slide do contador
+    document.getElementById('player-bg').style.backgroundImage = '';
+    document.getElementById('player-bg').style.background = 'linear-gradient(155deg,#c4005c,#4a0e4e)';
+    counter.classList.add('on');
+    refreshCounter();
+    cntInterval = setInterval(refreshCounter, 1000);
+    document.getElementById('p-title').textContent = settings.title || 'Nosso Wrapped';
+    document.getElementById('p-author').textContent = settings.author || '';
  
-  progressSec = 0;
-  document.getElementById('time-total').textContent = `0:${String(slideDuration).padStart(2, '0')}`;
-  document.getElementById('time-cur').textContent = '0:00';
-  document.getElementById('track-fill').style.width = '0%';
+  } else if (idx === total-1) {
+    // Slide da mensagem
+    document.getElementById('player-bg').style.backgroundImage = '';
+    document.getElementById('player-bg').style.background = 'linear-gradient(145deg,#003d61,#c45000)';
+    message.classList.add('on');
+    document.getElementById('msg-text').textContent = settings.message || 'Fim da retrospectiva!';
+    document.getElementById('p-title').textContent = 'Fim ❤️';
+    document.getElementById('p-author').textContent = settings.author || '';
+ 
+  } else {
+    // ✅ FOTO — exibe como capa de álbum
+    const photo = photos[idx - 1];
+    const bg = document.getElementById('player-bg');
+    bg.style.background = '';
+ 
+    // Carrega a imagem e exibe quando pronta
+    artEl.onload = () => { artEl.style.opacity = '1'; };
+    artEl.onerror = () => { artEl.style.opacity = '0'; };
+ 
+    if (artEl.src === photo.src) {
+      artEl.style.opacity = '1'; // já carregada
+    } else {
+      artEl.src = photo.src;
+    }
+ 
+    // Fundo desfocado = mesma foto
+    bg.style.backgroundImage = `url('${photo.src}')`;
+ 
+    document.getElementById('p-title').textContent = `Memória ${idx}`;
+    document.getElementById('p-author').textContent = settings.author || '';
+  }
 }
  
 function togglePlay() {
-  if (isPlaying) { pauseSystem(); }
-  else {
-    isPlaying = true;
-    if (settings.music) { bgMusic.play().catch(e => console.log('Autoplay bloqueado:', e)); }
-    updatePlayButtonUI();
-    clearInterval(progressInterval);
-    progressInterval = setInterval(() => {
-      progressSec += 0.05;
-      const pct = (progressSec / slideDuration) * 100;
-      const cb = document.getElementById(`story-fill-${currentIndex}`);
-      if (cb) cb.style.width = `${pct}%`;
-      document.getElementById('track-fill').style.width = `${pct}%`;
-      document.getElementById('time-cur').textContent = `0:${String(Math.floor(progressSec)).padStart(2, '0')}`;
-      if (progressSec >= slideDuration) { currentIndex++; showSlide(currentIndex); }
-    }, 50);
-  }
+  if (playing) { pause(); return; }
+  playing = true;
+  if (settings.music) audio.play().catch(()=>{});
+  updatePlayBtn();
+  clearInterval(progInterval);
+  progInterval = setInterval(() => {
+    progSec += 0.05;
+    const pct = (progSec/SLIDE_DUR)*100;
+    const b = document.getElementById(`b${curIdx}`); if(b) b.style.width = `${pct}%`;
+    document.getElementById('prog-fill').style.width = `${pct}%`;
+    document.getElementById('t-cur').textContent = `0:${String(Math.floor(progSec)).padStart(2,'0')}`;
+    if (progSec >= SLIDE_DUR) { curIdx++; showSlide(curIdx); }
+  }, 50);
 }
  
-function pauseSystem() {
-  isPlaying = false;
-  bgMusic.pause();
-  clearInterval(progressInterval);
-  updatePlayButtonUI();
+function pause() { playing=false; audio.pause(); clearInterval(progInterval); updatePlayBtn(); }
+function updatePlayBtn() {
+  document.getElementById('play-btn').innerHTML = playing
+    ? `<svg viewBox="0 0 24 24" width="24" height="24" fill="#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
+    : `<svg viewBox="0 0 24 24" width="24" height="24" fill="#000"><path d="M8 5v14l11-7z"/></svg>`;
 }
+function nextSlide() { pause(); curIdx++; showSlide(curIdx); }
+function prevSlide() { pause(); curIdx--; showSlide(curIdx); }
+function scrub(e) { const r=e.currentTarget.getBoundingClientRect(); progSec=((e.clientX-r.left)/r.width)*SLIDE_DUR; }
+function exitPlayer() { pause(); clearInterval(cntInterval); switchScreen('invite-screen'); }
  
-function updatePlayButtonUI() {
-  document.getElementById('play-btn-svg-content').innerHTML = isPlaying
-    ? `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
-    : `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000"><path d="M8 5v14l11-7z"/></svg>`;
-}
- 
-function nextPhoto() { pauseSystem(); currentIndex++; showSlide(currentIndex); }
-function prevPhoto() { pauseSystem(); currentIndex--; showSlide(currentIndex); }
- 
-function scrubProgress(e) {
-  const bar = e.currentTarget;
-  const rect = bar.getBoundingClientRect();
-  const pct = (e.clientX - rect.left) / rect.width;
-  progressSec = pct * slideDuration;
-}
- 
-function exitPlayer() {
-  pauseSystem();
-  clearInterval(counterRefreshInterval);
-  switchScreen('invite-screen');
-}
- 
+// ── ADMIN ──
 function promptAdmin() {
-  const pass = prompt("Senha Master Admin:");
-  if (pass === baseSettings.admin_password) {
-    switchScreen('admin-screen');
-    renderInvitesList();
-  } else if (pass !== null) {
-    alert("Senha incorreta.");
-  }
+  const p = prompt('Senha Admin:');
+  if (p === baseSettings.admin_password) { switchScreen('admin-screen'); renderInvites(); }
+  else if (p !== null) alert('Senha incorreta.');
 }
  
-function renderInvitesList() {
-  const list = document.getElementById('invite-list');
-  if (!list) return;
-  list.innerHTML = '';
-  if (invites.length === 0) {
-    list.innerHTML = '<li style="color:var(--text2); font-size:13px; padding:10px;">Nenhum perfil criado ainda.</li>';
-    return;
-  }
+function renderInvites() {
+  const list = document.getElementById('invite-list'); list.innerHTML = '';
+  if (!invites.length) { list.innerHTML = '<li style="color:var(--text2);font-size:13px;padding:8px">Nenhum perfil criado.</li>'; return; }
   invites.forEach(inv => {
-    list.innerHTML += `<li class="invite-item" onclick="selectProfile('${inv.code}')">
-      <div><span class="invite-code">[${inv.code}]</span> — ${inv.name}</div>
-      <button class="btn-delete" onclick="event.stopPropagation(); deleteProfile('${inv.id}', '${inv.code}')">Excluir</button>
-    </li>`;
+    const li = document.createElement('li');
+    li.className = 'invite-item' + (activeInvite?.code === inv.code ? ' selected' : '');
+    li.innerHTML = `<div><span class="inv-code">[${inv.code}]</span> — ${inv.name}</div><button class="btn-del" onclick="event.stopPropagation();deleteInvite('${inv.id}','${inv.code}')">Excluir</button>`;
+    li.onclick = () => selectProfile(inv.code);
+    list.appendChild(li);
   });
 }
  
 async function addInvite() {
-  const code = document.getElementById('new-code-input').value.trim().toUpperCase();
-  const name = document.getElementById('new-name-input').value.trim();
-  if (!code || !name) { toast('Preencha código e nome!', '#ff5555'); return; }
-  if (invites.find(i => i.code === code)) { toast('Código já existe!', '#ff5555'); return; }
-  // FIX 2: prefer correto para upsert/insert
-  await sb('invites', { method: 'POST', prefer: 'return=representation', body: { code, name } });
-  toast("Perfil Adicionado!");
-  document.getElementById('new-code-input').value = '';
-  document.getElementById('new-name-input').value = '';
-  await loadInvites();
-  renderInvitesList();
+  const code = document.getElementById('new-code').value.trim().toUpperCase();
+  const name = document.getElementById('new-name').value.trim();
+  if (!code||!name) { toast('Preencha código e nome!','#f55'); return; }
+  if (invites.find(i=>i.code===code)) { toast('Código já existe!','#f55'); return; }
+  await sb('invites',{method:'POST',prefer:'return=representation',body:{code,name}});
+  document.getElementById('new-code').value=''; document.getElementById('new-name').value='';
+  toast('Perfil adicionado!'); await loadInvites(); renderInvites();
 }
  
-async function deleteProfile(id, code) {
-  if (!confirm(`Deletar perfil "${code}"? Isso não remove as fotos do banco.`)) return;
-  await sb(`invites?id=eq.${id}`, { method: 'DELETE' });
-  if (activeInvite && activeInvite.code === code) {
-    activeInvite = null;
-    document.getElementById('active-invite-msg').textContent = 'Selecione um convite acima para começar a configurar.';
-    document.getElementById('photo-grid').innerHTML = '';
-  }
-  toast("Removido!");
-  await loadInvites();
-  renderInvitesList();
+async function deleteInvite(id, code) {
+  if (!confirm(`Deletar "${code}"?`)) return;
+  await sb(`invites?id=eq.${id}`,{method:'DELETE'});
+  if (activeInvite?.code===code) { activeInvite=null; document.getElementById('active-msg').textContent='Selecione um perfil acima.'; document.getElementById('photo-grid').innerHTML=''; }
+  toast('Removido!'); await loadInvites(); renderInvites();
 }
  
 async function selectProfile(code) {
-  activeInvite = invites.find(i => i.code === code);
+  activeInvite = invites.find(i=>i.code===code);
   applySettings();
-  document.getElementById('active-invite-msg').innerHTML = `Perfil Ativo: <b style="color:var(--spotify-green)">${activeInvite.name}</b>`;
-  document.getElementById('retro-title').value = settings.title || '';
-  document.getElementById('retro-author').value = settings.author || '';
-  document.getElementById('retro-music').value = settings.music || '';
-  document.getElementById('retro-date').value = settings.date || '';
-  document.getElementById('retro-message').value = settings.message || '';
-  await loadPhotos();
-  renderPhotosGrid();
+  document.getElementById('active-msg').innerHTML = `Perfil Ativo: <b style="color:var(--green)">${activeInvite.name}</b>`;
+  document.getElementById('f-title').value   = settings.title||'';
+  document.getElementById('f-author').value  = settings.author||'';
+  document.getElementById('f-music').value   = settings.music||'';
+  document.getElementById('f-date').value    = settings.date||'';
+  document.getElementById('f-message').value = settings.message||'';
+  document.querySelectorAll('.invite-item').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.invite-item').forEach(el => { if(el.textContent.includes(`[${code}]`)) el.classList.add('selected'); });
+  await loadPhotos(); renderPhotosGrid();
 }
  
+// ── PHOTOS GRID COM DRAG-AND-DROP ──
+let dragSrc = null;
+ 
 function renderPhotosGrid() {
-  const grid = document.getElementById('photo-grid');
-  grid.innerHTML = '';
-  if (photos.length === 0) {
-    grid.innerHTML = '<p style="color:var(--text2); font-size:13px;">Nenhuma foto adicionada ainda.</p>';
-    return;
-  }
-  photos.forEach(p => {
-    grid.innerHTML += `<div class="photo-thumb-wrap">
+  const grid = document.getElementById('photo-grid'); grid.innerHTML = '';
+  if (!photos.length) { grid.innerHTML='<p style="color:var(--text2);font-size:13px;">Nenhuma foto ainda.</p>'; return; }
+  photos.forEach((p, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'photo-thumb';
+    wrap.draggable = true;
+    wrap.dataset.id = p.id;
+    wrap.dataset.idx = i;
+    wrap.innerHTML = `
       <img src="${p.src}" loading="lazy">
-      <div class="photo-thumb-overlay"><button onclick="deletePhoto('${p.id}')">Apagar</button></div>
-    </div>`;
+      <div class="photo-num">${i+1}</div>
+      <div class="photo-overlay"><button onclick="deletePhoto('${p.id}')">Apagar</button></div>`;
+ 
+    // Drag events
+    wrap.addEventListener('dragstart', e => {
+      dragSrc = wrap;
+      wrap.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    wrap.addEventListener('dragend', () => wrap.classList.remove('dragging'));
+    wrap.addEventListener('dragover', e => { e.preventDefault(); wrap.classList.add('drag-over'); });
+    wrap.addEventListener('dragleave', () => wrap.classList.remove('drag-over'));
+    wrap.addEventListener('drop', async e => {
+      e.preventDefault();
+      wrap.classList.remove('drag-over');
+      if (!dragSrc || dragSrc === wrap) return;
+      const fromIdx = parseInt(dragSrc.dataset.idx);
+      const toIdx   = parseInt(wrap.dataset.idx);
+      // Reordena array local
+      const moved = photos.splice(fromIdx, 1)[0];
+      photos.splice(toIdx, 0, moved);
+      // Salva nova ordem no banco
+      await savePhotoOrder();
+      renderPhotosGrid();
+    });
+ 
+    grid.appendChild(wrap);
   });
 }
  
-// FIX 3: Upload separado para não reutilizar o mesmo input (evita bug de não disparar onChange na 2ª vez)
-function triggerUpload() {
-  if (!activeInvite) { alert("Por favor, selecione um perfil na lista primeiro."); return; }
-  const input = document.getElementById('file-input');
-  input.value = ''; // Reseta para garantir que o onchange dispara mesmo com os mesmos arquivos
-  input.click();
-}
- 
-// FIX 3: handleFiles reescrito com controle de progresso e await correto
-async function handleFiles(files) {
-  if (!files || files.length === 0) return;
-  if (!activeInvite) { alert("Por favor, selecione um perfil na lista primeiro."); return; }
- 
-  const uploadBtn = document.getElementById('upload-btn');
-  const statusEl = document.getElementById('upload-status');
-  uploadBtn.disabled = true;
-  statusEl.style.display = 'block';
- 
-  let success = 0;
-  let failed = 0;
- 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    statusEl.textContent = `Enviando foto ${i + 1} de ${files.length}...`;
-    try {
-      const compressedSrc = await compressImage(file, 700, 700);
-      const result = await sb('photos', {
-        method: 'POST',
-        // FIX 2: prefer correto para confirmar o insert
-        prefer: 'return=representation',
-        body: {
-          src: compressedSrc,
-          invite_code: activeInvite.code,
-          position: photos.length + i
-        }
-      });
-      if (result) success++;
-      else failed++;
-    } catch (err) {
-      console.error("Erro ao processar imagem:", file.name, err);
-      failed++;
-    }
+async function savePhotoOrder() {
+  for (let i=0; i<photos.length; i++) {
+    await sb(`photos?id=eq.${photos[i].id}`, { method:'PATCH', prefer:'return=minimal', body:{ position: i } });
   }
- 
-  statusEl.textContent = `✅ ${success} foto(s) enviada(s)${failed > 0 ? ` | ❌ ${failed} falha(s)` : ''}.`;
-  uploadBtn.disabled = false;
-  uploadBtn.textContent = '+ Enviar Fotos para o Perfil';
- 
-  await loadPhotos();
-  renderPhotosGrid();
-  if (success > 0) toast(`${success} foto(s) adicionada(s)!`);
+  toast('Ordem salva!');
 }
  
-function compressImage(file, maxWidth, maxHeight) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
+function triggerUpload() {
+  if (!activeInvite) { alert('Selecione um perfil primeiro.'); return; }
+  const inp = document.getElementById('file-input'); inp.value=''; inp.click();
+}
+ 
+async function handleFiles(files) {
+  if (!files?.length || !activeInvite) return;
+  const btn = document.getElementById('upload-btn');
+  const status = document.getElementById('upload-status');
+  btn.disabled = true; status.style.display='block';
+  let ok=0, fail=0;
+  for (let i=0; i<files.length; i++) {
+    status.textContent = `Enviando ${i+1}/${files.length}...`;
+    try {
+      const src = await compressImage(files[i], 700, 700);
+      const r = await sb('photos',{method:'POST',prefer:'return=representation',body:{src, invite_code:activeInvite.code, position:photos.length+i}});
+      if(r) ok++; else fail++;
+    } catch { fail++; }
+  }
+  status.textContent = `✅ ${ok} enviada(s)${fail?` | ❌ ${fail} falha(s)`:''}`;
+  btn.disabled=false;
+  await loadPhotos(); renderPhotosGrid();
+  if(ok) toast(`${ok} foto(s) adicionada(s)!`);
+}
+ 
+function compressImage(file, mw, mh) {
+  return new Promise((res,rej) => {
+    const reader = new FileReader(); reader.readAsDataURL(file);
+    reader.onload = ev => {
+      const img = new Image(); img.src = ev.target.result;
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        if (width > height) {
-          if (width > maxWidth) { height = Math.round(height * maxWidth / width); width = maxWidth; }
-        } else {
-          if (height > maxHeight) { width = Math.round(width * maxHeight / height); height = maxHeight; }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.75));
+        let w=img.width, h=img.height;
+        if(w>h){ if(w>mw){ h=Math.round(h*mw/w); w=mw; } }
+        else { if(h>mh){ w=Math.round(w*mh/h); h=mh; } }
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        res(c.toDataURL('image/jpeg',.75));
       };
-      img.onerror = reject;
+      img.onerror=rej;
     };
-    reader.onerror = reject;
+    reader.onerror=rej;
   });
 }
  
 async function deletePhoto(id) {
-  if (!confirm("Apagar esta foto?")) return;
-  await sb(`photos?id=eq.${id}`, { method: 'DELETE' });
-  toast("Foto removida.");
-  await loadPhotos();
-  renderPhotosGrid();
+  if (!confirm('Apagar esta foto?')) return;
+  await sb(`photos?id=eq.${id}`,{method:'DELETE'});
+  toast('Foto removida.'); await loadPhotos(); renderPhotosGrid();
 }
  
-// FIX 2: saveAllSettings com prefer correto para upsert
 async function saveAllSettings() {
-  if (!activeInvite) { toast('Selecione um perfil primeiro!', '#ff5555'); return; }
+  if (!activeInvite) { toast('Selecione um perfil!','#f55'); return; }
   const payload = [
-    { key: `invite:${activeInvite.code}:title`,   value: document.getElementById('retro-title').value },
-    { key: `invite:${activeInvite.code}:author`,  value: document.getElementById('retro-author').value },
-    { key: `invite:${activeInvite.code}:music`,   value: document.getElementById('retro-music').value },
-    { key: `invite:${activeInvite.code}:date`,    value: document.getElementById('retro-date').value },
-    { key: `invite:${activeInvite.code}:message`, value: document.getElementById('retro-message').value },
+    { key:`invite:${activeInvite.code}:title`,   value:document.getElementById('f-title').value },
+    { key:`invite:${activeInvite.code}:author`,  value:document.getElementById('f-author').value },
+    { key:`invite:${activeInvite.code}:music`,   value:document.getElementById('f-music').value },
+    { key:`invite:${activeInvite.code}:date`,    value:document.getElementById('f-date').value },
+    { key:`invite:${activeInvite.code}:message`, value:document.getElementById('f-message').value },
   ];
-  for (let item of payload) {
-    await sb('settings', {
-      method: 'POST',
-      // FIX 2: valor correto do Prefer para upsert no Supabase PostgREST
-      prefer: 'resolution=merge-duplicates,return=representation',
-      body: item
-    });
-  }
-  toast("✅ Dados salvos com sucesso!");
-  await loadSettings();
-  applySettings();
+  for (const item of payload) await sb('settings',{method:'POST',prefer:'resolution=merge-duplicates,return=representation',body:item});
+  toast('✅ Dados salvos!'); await loadSettings(); applySettings();
 }
  
-function logout() { activeInvite = null; switchScreen('invite-screen'); }
+function logout() { activeInvite=null; switchScreen('invite-screen'); }
 </script>
 </body>
 </html>
