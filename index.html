@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Retrospectiva dos nossos momentos</title>
+<title>Meu Spotify Wrapped - Retrospectiva</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -131,14 +131,13 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
 <div id="loading-screen" class="screen"><div class="loader"></div><div style="font-size:13px;color:var(--text2);" id="loading-msg">Carregando dados...</div></div>
 <div id="toast"></div>
  
-<!-- TELA DE LOGIN -->
 <div id="invite-screen" class="screen hidden">
   <div class="invite-card">
     <div class="badge">Nossa Retrospectiva</div>
-    <h1 class="invite-title">Uma lembrança feita com muito carinho</h1>
-    <p class="invite-sub">O amor tudo suporta, tudo espera...</p>
+    <h1 class="invite-title">Nosso Wrapped de Amor</h1>
+    <p class="invite-sub">Insira seu código de acesso para iniciar a viagem pelas nossas melhores memórias.</p>
     <input id="code-input" class="round-input" type="text" placeholder="CÓDIGO DE ACESSO" maxlength="16">
-    <button class="btn-green" onclick="tryEnter()">PLAY</button>
+    <button class="btn-green" onclick="tryEnter()">Abrir Retrospectiva</button>
     <div id="error-msg" style="color:var(--pink); font-size:13px; margin-top:12px; font-weight:700;"></div>
     <p style="font-size:12px; margin-top:32px;">
       <a href="#" onclick="promptAdmin()" style="color:var(--green); text-decoration:none; font-weight:700;">Acessar Painel Admin</a>
@@ -146,7 +145,6 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
   </div>
 </div>
  
-<!-- TELA DO ADMIN -->
 <div id="admin-screen" class="screen hidden">
   <div class="admin-wrap">
     <div class="admin-head">
@@ -157,7 +155,6 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
       </div>
     </div>
  
-    <!-- Gerenciar Perfis -->
     <div class="sec">
       <div class="sec-title">🔑 Perfis de Casais</div>
       <div class="card">
@@ -170,7 +167,6 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
       </div>
     </div>
  
-    <!-- Configurações de Dados -->
     <div class="sec">
       <div class="sec-title">⚙️ Informações da Retrospectiva</div>
       <div class="card">
@@ -186,7 +182,6 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
       </div>
     </div>
  
-    <!-- Upload e Organização das Imagens -->
     <div class="sec">
       <div class="sec-title">📸 Fotos (Arraste para mudar a ordem)</div>
       <div class="card">
@@ -200,29 +195,26 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
   </div>
 </div>
  
-<!-- TELA DO PLAYER (ESTILO STORIES) -->
 <div id="player-screen" class="screen hidden">
   <div id="player-bg"></div>
   <div class="player-wrap">
     <div class="bars" id="bars"></div>
-    
+     
     <div class="p-header">
       <svg width="22" height="22" fill="white" viewBox="0 0 24 24" onclick="exitPlayer()" style="cursor:pointer"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
-      <div class="p-ctx">Um pouco da Nossa História</div>
+      <div class="p-ctx">Nossa História Retrospectiva</div>
       <svg width="22" height="22" fill="white" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
     </div>
  
     <div class="art-box">
       <img id="album-art" src="" alt="Foto de Capa">
  
-      <!-- Slide 1: Contador -->
       <div class="w-counter" id="w-counter">
         <div class="cnt-badge">Nosso Tempo Juntos</div>
         <div class="cnt-days" id="cnt-days">0 Dias</div>
         <div class="cnt-sub" id="cnt-sub">Conectados em cada momento.</div>
       </div>
  
-      <!-- Slide Final: Mensagem -->
       <div class="w-message" id="w-message">
         <div class="msg-lbl">Mensagem de Encerramento</div>
         <div class="msg-bubble" id="msg-text"></div>
@@ -258,7 +250,7 @@ h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spa
 const SUPABASE_URL = 'https://eromoiokvtnienjojson.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyb21vaW9rdnRuaWVuam9qc29uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5NTQwMDQsImV4cCI6MjA5NjUzMDAwNH0.iqETV9HYsQx17GQ1BCo1Ui9-YKNJjZg3cnXtfN2hNOY';
  
-// FUNÇÃO DE REQUISIÇÃO ATUALIZADA E BLINDADA CONTRA ERRO DE API KEY
+// REQUISIÇÕES SUPABASE API REST
 async function sb(path, opts = {}) {
   const urlComChave = `${SUPABASE_URL}/rest/v1/${path}${path.includes('?') ? '&' : '?'}apikey=${SUPABASE_KEY}`;
   
@@ -285,7 +277,7 @@ const DEF = { title:'Nosso Wrapped', author:'Memórias de Nós Dois', music:'', 
 let baseSettings = {...DEF}, inviteSettings = {}, settings = {...DEF};
 let photos = [], invites = [], activeInvite = null;
 let curIdx = 0, playing = false, progInterval = null, cntInterval = null, progSec = 0;
-const SLIDE_DUR = 6; // Tempo em segundos de cada foto
+const SLIDE_DUR = 6; 
 const audio = document.getElementById('bg-music');
  
 // INICIALIZAÇÃO
@@ -318,7 +310,7 @@ function applySettings() {
  
 async function loadInvites() { invites = await sb('invites?select=*') || []; }
  
-// FUNÇÃO ATUALIZADA PARA EXTRAÇÃO LIMPA DAS FOTOS POR FILTRO DE CÓDIGO
+// BUSCA E EXTRAÇÃO DE FOTOS DO CASAL ATIVO
 async function loadPhotos() {
   if (!activeInvite) return;
   try {
@@ -361,7 +353,7 @@ function goPlayer() {
  
 function buildBars() {
   const wrap = document.getElementById('bars'); wrap.innerHTML = '';
-  const total = photos.length + 2; // Contador + Fotos + Mensagem Final
+  const total = photos.length + 2; 
   for (let i=0; i<total; i++) wrap.innerHTML += `<div class="bar-bg"><div class="bar-fill" id="b${i}"></div></div>`;
 }
  
@@ -390,7 +382,21 @@ function refreshCounter() {
   document.getElementById('cnt-sub').textContent = t.text;
 }
  
-// MECÂNICA DOS STORIES / SLIDES
+// HELPER PARA EXTRAIR NOME DO ARQUIVO SE HOUVER MARCADOR
+function parsePhotoData(photoObj) {
+  const s = photoObj.src || '';
+  if (s.startsWith('[NAME:')) {
+    const endIdx = s.indexOf(']');
+    if (endIdx !== -1) {
+      const name = s.substring(6, endIdx);
+      const src = s.substring(endIdx + 1);
+      return { name, src };
+    }
+  }
+  return { name: null, src: s };
+}
+
+// STORIES / SLIDES PLAYER
 function showSlide(idx) {
   const total = photos.length + 2;
   if (idx < 0) { curIdx = 0; return; }
@@ -432,12 +438,15 @@ function showSlide(idx) {
  
   } else {
     const photo = photos[idx - 1];
+    const data = parsePhotoData(photo);
     const bg = document.getElementById('player-bg');
     bg.style.background = '';
-    artEl.src = photo.src;
+    artEl.src = data.src;
     artEl.style.opacity = '1';
-    bg.style.backgroundImage = `url('${photo.src}')`;
-    document.getElementById('p-title').textContent = `Nossa Memória #${idx}`;
+    bg.style.backgroundImage = `url('${data.src}')`;
+    
+    // ATUALIZAÇÃO: Se a foto tiver o nome do arquivo guardado, usa ele. Senão usa o padrão antigo.
+    document.getElementById('p-title').textContent = data.name || `Nossa Memória #${idx}`;
     document.getElementById('p-author').textContent = settings.author || '';
   }
 }
@@ -519,7 +528,7 @@ async function selectProfile(code) {
   await loadPhotos(); renderPhotosGrid();
 }
  
-// INTERFACE DE DRAG-AND-DROP (ARRASTAR E SOLTAR FOTOS)
+// INTERFACE DE ARRASTAR E SOLTAR FOTOS
 let dragSrc = null;
  
 function renderPhotosGrid() {
@@ -527,13 +536,14 @@ function renderPhotosGrid() {
   if (!photos.length) { grid.innerHTML='<p style="color:var(--text2);font-size:13px;">Nenhuma foto adicionada neste perfil.</p>'; return; }
   
   photos.forEach((p, i) => {
+    const data = parsePhotoData(p);
     const wrap = document.createElement('div');
     wrap.className = 'photo-thumb';
     wrap.draggable = true;
     wrap.dataset.id = p.id;
     wrap.dataset.idx = i;
     wrap.innerHTML = `
-      <img src="${p.src}" loading="lazy">
+      <img src="${data.src}" loading="lazy">
       <div class="photo-num">${i+1}</div>
       <div class="photo-overlay"><button onclick="deletePhoto('${p.id}')">Remover</button></div>`;
  
@@ -575,7 +585,7 @@ async function savePhotoOrder() {
       })
     );
     await Promise.all(promises);
-    toast('Ordem atualizada!');
+    toast('Ordem updated!');
   } catch(err) {
     console.error(err);
     toast('Erro ao sincronizar ordem com o banco.', '#ff4b91');
@@ -594,16 +604,28 @@ async function handleFiles(files) {
   const status = document.getElementById('upload-status');
   btn.disabled = true; status.style.display='block';
   let ok=0, fail=0;
+  
   for (let i=0; i<files.length; i++) {
     status.textContent = `Enviando foto ${i+1} de ${files.length}...`;
     try {
-      const src = await compressImage(files[i], 700, 700);
-      const r = await sb('photos',{method:'POST',prefer:'return=representation',body:{src, invite_code:activeInvite.code, position:photos.length+i}});
-      if(r) ok++; else fail++;
-    } catch { fail++; }
+      const origName = files[i].name.replace(/\.[^/.]+$/, ""); // Extrai o nome do arquivo limpo (sem .jpg/.png)
+      const compressedB64 = await compressImage(files[i], 700, 700);
+      
+      // Injeta o marcador de nome na string final que vai para o Supabase
+      const srcWithFilename = `[NAME:${origName}]${compressedB64}`;
+      
+      await sb('photos', {
+        method: 'POST',
+        prefer: 'return=minimal',
+        body: { src: srcWithFilename, invite_code: activeInvite.code, position: photos.length + i }
+      });
+      ok++;
+    } catch (e) { 
+      fail++; 
+    }
   }
-  status.textContent = `✅ ${ok} salva(s)${fail?` | ❌ ${fail} erro(s)`:''}`;
-  btn.disabled=false;
+  status.textContent = `✅ Processado com sucesso!`;
+  btn.disabled = false;
   await loadPhotos(); renderPhotosGrid();
   if(ok) toast(`${ok} foto(s) inserida(s)!`);
 }
@@ -633,7 +655,7 @@ async function deletePhoto(id) {
   toast('Foto removida.'); await loadPhotos(); renderPhotosGrid();
 }
  
-// SALVAR TODAS AS CONFIGURAÇÕES DE TEXTO
+// SALVAR CONFIGURAÇÕES DE TEXTO
 async function saveAllSettings() {
   if(!activeInvite) return;
   const code = activeInvite.code;
@@ -663,5 +685,4 @@ async function saveAllSettings() {
 </script>
 </body>
 </html>
- 
 
