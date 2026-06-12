@@ -388,12 +388,12 @@ function parsePhotoData(photoObj) {
   if (s.startsWith('[NAME:')) {
     const endIdx = s.indexOf(']');
     if (endIdx !== -1) {
-      const name = s.substring(6, endIdx);
-      const src = s.substring(endIdx + 1);
+      const name = s.substring(6, endIdx); // Extrai o nome do arquivo
+      const src = s.substring(endIdx + 1); // Extrai a imagem real (Base64)
       return { name, src };
     }
   }
-  return { name: null, src: s };
+  return { name: null, src: s }; // Retorno seguro para fotos antigas
 }
 
 // STORIES / SLIDES PLAYER
