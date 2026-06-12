@@ -62,33 +62,120 @@
   .input-block { display: flex; flex-direction: column; gap: 6px; }
   .input-block label { font-size: 13px; color: var(--text2); font-weight: 600; }
   .admin-card textarea { background: var(--surface2); border: none; border-radius: 4px; padding: 12px; color: white; height: 80px; resize: none; font-family: inherit; outline: none; width: 100%; }
-  #player-screen { background: #121212; flex-direction: column; justify-content: space-between; padding: 20px; }
-  .player-container { width: 100%; max-width: 420px; display: flex; flex-direction: column; height: 100%; justify-content: space-between; position: relative; }
+  /* ── PLAYER SCREEN ── */
+  #player-screen {
+    background: #121212;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+  /* Fundo desfocado dinâmico — mesma foto, escurecida */
+  #player-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(60px) brightness(0.35) saturate(1.4);
+    transform: scale(1.15);
+    transition: background-image 0.8s ease;
+    z-index: 0;
+  }
+  .player-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+    padding: 20px 20px 28px;
+  }
   .story-progress-container { display: flex; gap: 4px; width: 100%; padding: 10px 0; }
-  .story-bar-bg { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
-  .story-bar-fill { height: 100%; width: 0%; background: #fff; }
+  .story-bar-bg { flex: 1; height: 3px; background: rgba(255,255,255,0.25); border-radius: 2px; overflow: hidden; }
+  .story-bar-fill { height: 100%; width: 0%; background: #fff; transition: none; }
   .player-header { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 5px; }
-  .context-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text2); font-weight: 700; }
-  .center-content-box { position: relative; width: 100%; aspect-ratio: 1; background: #282828; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.6); margin: 20px 0; display: flex; align-items: center; justify-content: center; }
-  .spotify-art { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; transition: opacity 0.3s ease; }
-  .wrapped-counter-widget { position: absolute; inset: 0; background: linear-gradient(180deg, var(--wrapped-pink) 0%, #4a0e4e 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; color: white; z-index: 2; box-sizing: border-box; }
-  .counter-badge { background: #fff; color: #000; font-size: 12px; font-weight: 900; padding: 4px 12px; border-radius: 20px; margin-bottom: 24px; text-transform: uppercase; }
-  .counter-big-text { font-size: 46px; line-height: 1; color: var(--wrapped-yellow); margin-bottom: 12px; text-transform: uppercase; }
-  .counter-sub { font-size: 16px; font-weight: 500; color: #fff; line-height: 1.4; }
-  .wrapped-message-widget { position: absolute; inset: 0; background: linear-gradient(135deg, #004f7a 0%, var(--wrapped-orange) 100%); display: flex; flex-direction: column; justify-content: space-between; padding: 24px; text-align: left; z-index: 3; overflow-y: auto; }
-  .msg-bubble { background: rgba(0,0,0,0.4); padding: 20px; border-radius: var(--radius-lg); font-size: 16px; font-style: italic; line-height: 1.6; color: #fff; border-left: 4px solid var(--wrapped-yellow); max-height: 160px; overflow-y: auto; margin-bottom: 12px; }
-  .meta-container { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .meta-text { display: flex; flex-direction: column; max-width: 80%; }
+  .context-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.7); font-weight: 700; }
+ 
+  /* ── ALBUM ART BOX ── */
+  .center-content-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.75);
+    margin: 16px 0;
+    background: #282828;
+    flex-shrink: 0;
+  }
+  /* Foto principal — transição suave entre fotos */
+  .spotify-art {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 1;
+  }
+  .spotify-art.visible { opacity: 1; }
+ 
+  /* Widgets sobre a capa */
+  .wrapped-counter-widget {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, #c4005c 0%, #4a0e4e 100%);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px; text-align: center; color: white;
+    z-index: 2;
+    animation: fadeInScale 0.4s ease;
+  }
+  .wrapped-counter-widget.active { display: flex; }
+  .counter-badge { background: #fff; color: #000; font-size: 11px; font-weight: 900; padding: 4px 12px; border-radius: 20px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .counter-big-text { font-size: 52px; line-height: 1; color: var(--wrapped-yellow); margin-bottom: 10px; }
+  .counter-sub { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.9); line-height: 1.5; }
+ 
+  .wrapped-message-widget {
+    position: absolute; inset: 0;
+    background: linear-gradient(145deg, #003d61 0%, #c45000 100%);
+    display: none; flex-direction: column; justify-content: center;
+    padding: 28px; text-align: left;
+    z-index: 2;
+    animation: fadeInScale 0.4s ease;
+    overflow-y: auto;
+  }
+  .wrapped-message-widget.active { display: flex; }
+  .msg-bubble {
+    background: rgba(0,0,0,0.35);
+    padding: 20px; border-radius: 10px;
+    font-size: 15px; font-style: italic; line-height: 1.7; color: #fff;
+    border-left: 4px solid var(--wrapped-yellow);
+    margin-top: 14px;
+  }
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+ 
+  /* ── METADATA + CONTROLS ── */
+  .meta-container { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .meta-text { display: flex; flex-direction: column; max-width: 85%; }
   .meta-title { font-size: 22px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .meta-author { font-size: 14px; color: var(--text2); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .spotify-progress-wrapper { width: 100%; margin-bottom: 20px; }
-  .spotify-track-line { height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; width: 100%; position: relative; cursor: pointer; }
-  .spotify-track-fill { height: 100%; background: #fff; width: 0%; border-radius: 2px; }
-  .spotify-time-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-top: 8px; }
-  .spotify-controls-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 10px; margin-bottom: 20px; }
-  .icon-btn { background: none; border: none; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .meta-author { font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ 
+  .spotify-progress-wrapper { width: 100%; margin-bottom: 18px; }
+  .spotify-track-line { height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; width: 100%; position: relative; cursor: pointer; }
+  .spotify-track-line:hover { height: 6px; }
+  .spotify-track-fill { height: 100%; background: #fff; width: 0%; border-radius: 2px; transition: none; }
+  .spotify-time-labels { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+ 
+  .spotify-controls-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 6px; margin-bottom: 8px; }
+  .icon-btn { background: none; border: none; color: rgba(255,255,255,0.55); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
+  .icon-btn:hover { color: #fff; }
   .icon-btn.active { color: var(--spotify-green); }
-  .master-play-btn { background: #fff; border: none; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .master-play-btn { background: #fff; border: none; width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: transform 0.15s; }
+  .master-play-btn:hover { transform: scale(1.07); }
   .master-play-btn svg { fill: #000; width: 24px; height: 24px; }
 </style>
 </head>
@@ -160,6 +247,9 @@
 </div>
  
 <div id="player-screen" class="screen hidden">
+  <!-- Fundo desfocado dinâmico -->
+  <div id="player-bg"></div>
+ 
   <div class="player-container">
     <div class="story-progress-container" id="story-progress-wrap"></div>
     <div class="player-header">
@@ -167,34 +257,41 @@
       <div class="context-title">NOSSA HISTÓRIA</div>
       <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
     </div>
+ 
     <div class="center-content-box">
+      <!-- Foto da retrospectiva — capa de álbum -->
       <img id="album-art" class="spotify-art" src="">
-      <div class="wrapped-counter-widget" id="counter-widget" style="display:none;">
+ 
+      <!-- Slide 0: Contador de dias -->
+      <div class="wrapped-counter-widget" id="counter-widget">
         <div class="counter-badge">Nosso tempo</div>
         <div class="counter-big-text" id="counter-days-count">0 Dias</div>
         <div class="counter-sub" id="counter-breakdown">Conectados de corpo e alma.</div>
       </div>
-      <div class="wrapped-message-widget" id="message-widget" style="display:none;">
-        <div>
-          <div class="wrapped-badge" style="background:var(--wrapped-yellow)">Sua Mensagem Final</div>
-          <div class="msg-bubble" id="final-msg-text"></div>
-        </div>
+ 
+      <!-- Último slide: Mensagem final -->
+      <div class="wrapped-message-widget" id="message-widget">
+        <div class="wrapped-badge" style="background:var(--wrapped-yellow); margin-bottom:0;">Sua Mensagem Final</div>
+        <div class="msg-bubble" id="final-msg-text"></div>
       </div>
     </div>
+ 
     <div class="meta-container">
       <div class="meta-text">
         <div class="meta-title" id="track-title">Carregando...</div>
         <div class="meta-author" id="track-author">Seu Álbum</div>
       </div>
     </div>
+ 
     <div class="spotify-progress-wrapper">
       <div class="spotify-track-line" onclick="scrubProgress(event)"><div class="spotify-track-fill" id="track-fill"></div></div>
       <div class="spotify-time-labels"><span id="time-cur">0:00</span><span id="time-total">0:06</span></div>
     </div>
+ 
     <div class="spotify-controls-row">
       <button class="icon-btn" id="shuffle-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
       <button class="icon-btn" onclick="prevPhoto()"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
-      <button class="master-play-btn" onclick="togglePlay()"><g id="play-btn-svg-content"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></g></button>
+      <button class="master-play-btn" onclick="togglePlay()"><span id="play-btn-svg-content"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000"><path d="M8 5v14l11-7z"/></svg></span></button>
       <button class="icon-btn" onclick="nextPhoto()"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M18 6h-2v12h2zM5 18l11-6L5 6v12z"/></svg></button>
       <button class="icon-btn" id="repeat-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v3h12v-6h-2v4z"/></svg></button>
     </div>
@@ -380,40 +477,66 @@ function updateCounterSlide() {
   document.getElementById('counter-breakdown').textContent = timeData.text;
 }
  
+function setAlbumArt(src) {
+  const img = document.getElementById('album-art');
+  const bg  = document.getElementById('player-bg');
+  // Crossfade: esconde, troca src, mostra
+  img.classList.remove('visible');
+  setTimeout(() => {
+    img.src = src;
+    img.onload = () => img.classList.add('visible');
+    // Fundo desfocado com a mesma imagem
+    bg.style.backgroundImage = `url('${src}')`;
+  }, 200);
+}
+ 
 function showSlide(idx) {
   const totalSlides = photos.length + 2;
   if (idx < 0) { currentIndex = 0; return; }
   if (idx >= totalSlides) { currentIndex = totalSlides - 1; pauseSystem(); return; }
  
-  // Para o refresh automático do contador ao sair do slide 0
   clearInterval(counterRefreshInterval);
   counterRefreshInterval = null;
  
-  document.getElementById('counter-widget').style.display = 'none';
-  document.getElementById('message-widget').style.display = 'none';
-  document.getElementById('album-art').style.display = 'block';
+  // Oculta todos os widgets
+  document.getElementById('counter-widget').classList.remove('active');
+  document.getElementById('message-widget').classList.remove('active');
+  document.getElementById('album-art').style.visibility = 'visible';
  
+  // Atualiza barras de progresso
   for (let i = 0; i < totalSlides; i++) {
     const f = document.getElementById(`story-fill-${i}`);
     if (f) f.style.width = i < idx ? '100%' : '0%';
   }
  
   if (idx === 0) {
-    document.getElementById('counter-widget').style.display = 'flex';
+    // Slide de contador — fundo rosa, sem foto
+    document.getElementById('album-art').style.visibility = 'hidden';
+    document.getElementById('album-art').classList.remove('visible');
+    document.getElementById('player-bg').style.backgroundImage = 'linear-gradient(160deg, #c4005c, #4a0e4e)';
+    document.getElementById('counter-widget').classList.add('active');
     updateCounterSlide();
-    // FIX 1: Atualiza o contador a cada segundo enquanto estiver no slide
     counterRefreshInterval = setInterval(updateCounterSlide, 1000);
     document.getElementById('track-title').textContent = settings.title || 'Nosso Wrapped';
+    document.getElementById('track-author').textContent = settings.author || '';
   }
   else if (idx === totalSlides - 1) {
-    document.getElementById('message-widget').style.display = 'flex';
+    // Último slide — mensagem final
+    document.getElementById('album-art').style.visibility = 'hidden';
+    document.getElementById('album-art').classList.remove('visible');
+    document.getElementById('player-bg').style.backgroundImage = 'linear-gradient(145deg, #003d61, #c45000)';
+    document.getElementById('message-widget').classList.add('active');
     document.getElementById('final-msg-text').textContent = settings.message || "Fim da retrospectiva!";
-    document.getElementById('track-title').textContent = "Fim!";
+    document.getElementById('track-title').textContent = "Fim ❤️";
+    document.getElementById('track-author').textContent = settings.author || '';
   }
   else {
+    // Foto da retrospectiva — exibe como capa de álbum
     const photo = photos[idx - 1];
-    document.getElementById('album-art').src = photo.src;
-    document.getElementById('track-title').textContent = `Momento número ${idx}`;
+    document.getElementById('album-art').style.visibility = 'visible';
+    setAlbumArt(photo.src);
+    document.getElementById('track-title').textContent = photo.title || `Momento ${idx}`;
+    document.getElementById('track-author').textContent = settings.author || '';
   }
  
   progressSec = 0;
@@ -450,8 +573,8 @@ function pauseSystem() {
  
 function updatePlayButtonUI() {
   document.getElementById('play-btn-svg-content').innerHTML = isPlaying
-    ? `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
-    : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+    ? `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
+    : `<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#000"><path d="M8 5v14l11-7z"/></svg>`;
 }
  
 function nextPhoto() { pauseSystem(); currentIndex++; showSlide(currentIndex); }
