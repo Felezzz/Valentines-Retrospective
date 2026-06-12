@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Retrospectiva</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=700;800;900&family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -83,7 +83,7 @@ h1,h2,h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spaci
 /* Story bars */
 .bars { display:flex;gap:4px;width:100%;padding:8px 0; }
 .bar-bg { flex:1;height:3px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden; }
-.bar-fill { height:100%;width:0%;background:#fff; }
+.bar-fill { height:100%; width:0%; background:#fff; }
  
 .p-header { display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:4px; }
 .p-ctx { font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.6);font-weight:700; }
@@ -91,10 +91,9 @@ h1,h2,h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spaci
 /* Album art box */
 .art-box { position:relative;width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8);margin:14px 0;background:#1a1a1a;flex-shrink:0; }
  
-/* A imagem começa invisível e fica visível via JS */
 #album-art { width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity .45s ease;z-index:1; }
  
-/* Widgets — display:none por padrão, JS adiciona .on para mostrar */
+/* Widgets */
 .w-counter,.w-message {
   position:absolute;inset:0;z-index:2;
   display:none;flex-direction:column;align-items:center;justify-content:center;
@@ -137,7 +136,6 @@ h1,h2,h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spaci
 <div id="loading-screen" class="screen"><div class="loader"></div><div style="font-size:13px;color:var(--text2);font-weight:500" id="loading-msg">Carregando...</div></div>
 <div id="toast"></div>
  
-<!-- INVITE -->
 <div id="invite-screen" class="screen hidden">
   <div class="invite-card">
     <div class="badge">Nossa Retrospectiva</div>
@@ -152,7 +150,6 @@ h1,h2,h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spaci
   </div>
 </div>
  
-<!-- ADMIN -->
 <div id="admin-screen" class="screen hidden">
   <div class="admin-wrap">
     <div class="admin-head">
@@ -203,7 +200,6 @@ h1,h2,h3 { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spaci
   </div>
 </div>
  
-<!-- PLAYER -->
 <div id="player-screen" class="screen hidden">
   <div id="player-bg"></div>
   <div class="player-wrap">
@@ -324,6 +320,7 @@ async function tryEnter() {
 // ── PLAYER ──
 function goPlayer() {
   switchScreen('player-screen');
+  // Se o usuário entrar pela visualização do Admin sem fotos salvas, exibe imagem demo
   if (!photos.length) photos = [{ id:'_demo', src:'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600', invite_code:'', position:0 }];
   curIdx = 0; playing = false;
   updatePlayBtn();
@@ -362,7 +359,7 @@ function refreshCounter() {
   document.getElementById('cnt-sub').textContent = t.text;
 }
  
-// ── SHOW SLIDE ── (aqui está a correção principal das fotos)
+// ── SHOW SLIDE ── (Ajustada a exibição e opacidade correta das fotos)
 function showSlide(idx) {
   const total = photos.length + 2;
   if (idx < 0) { curIdx = 0; return; }
@@ -370,26 +367,25 @@ function showSlide(idx) {
  
   clearInterval(cntInterval); cntInterval = null;
  
-  // Oculta tudo primeiro
   const artEl   = document.getElementById('album-art');
   const counter = document.getElementById('w-counter');
   const message = document.getElementById('w-message');
+  
   counter.classList.remove('on');
   message.classList.remove('on');
   artEl.style.opacity = '0';
  
-  // Atualiza barras
-  const total2 = photos.length + 2;
-  for (let i=0; i<total2; i++) { const b=document.getElementById(`b${i}`); if(b) b.style.width = i<idx?'100%':'0%'; }
+  // Atualiza barras superiores do story
+  for (let i=0; i<total; i++) { const b=document.getElementById(`b${i}`); if(b) b.style.width = i<idx?'100%':'0%'; }
  
-  // Reset progresso
+  // Reset barra inferior de progresso do player
   progSec = 0;
   document.getElementById('t-tot').textContent = `0:${String(SLIDE_DUR).padStart(2,'0')}`;
   document.getElementById('t-cur').textContent = '0:00';
   document.getElementById('prog-fill').style.width = '0%';
  
   if (idx === 0) {
-    // Slide do contador
+    // Slide inicial (Tempo de namoro)
     document.getElementById('player-bg').style.backgroundImage = '';
     document.getElementById('player-bg').style.background = 'linear-gradient(155deg,#c4005c,#4a0e4e)';
     counter.classList.add('on');
@@ -399,7 +395,7 @@ function showSlide(idx) {
     document.getElementById('p-author').textContent = settings.author || '';
  
   } else if (idx === total-1) {
-    // Slide da mensagem
+    // Slide final (Mensagem de Amor)
     document.getElementById('player-bg').style.backgroundImage = '';
     document.getElementById('player-bg').style.background = 'linear-gradient(145deg,#003d61,#c45000)';
     message.classList.add('on');
@@ -408,22 +404,13 @@ function showSlide(idx) {
     document.getElementById('p-author').textContent = settings.author || '';
  
   } else {
-    // ✅ FOTO — exibe como capa de álbum
+    // Slide de Foto ativa
     const photo = photos[idx - 1];
     const bg = document.getElementById('player-bg');
     bg.style.background = '';
  
-    // Carrega a imagem e exibe quando pronta
-    artEl.onload = () => { artEl.style.opacity = '1'; };
-    artEl.onerror = () => { artEl.style.opacity = '0'; };
- 
-    if (artEl.src === photo.src) {
-      artEl.style.opacity = '1'; // já carregada
-    } else {
-      artEl.src = photo.src;
-    }
- 
-    // Fundo desfocado = mesma foto
+    artEl.src = photo.src;
+    artEl.style.opacity = '1'; // Torna visível imediatamente
     bg.style.backgroundImage = `url('${photo.src}')`;
  
     document.getElementById('p-title').textContent = `Memória ${idx}`;
@@ -540,10 +527,8 @@ function renderPhotosGrid() {
       if (!dragSrc || dragSrc === wrap) return;
       const fromIdx = parseInt(dragSrc.dataset.idx);
       const toIdx   = parseInt(wrap.dataset.idx);
-      // Reordena array local
       const moved = photos.splice(fromIdx, 1)[0];
       photos.splice(toIdx, 0, moved);
-      // Salva nova ordem no banco
       await savePhotoOrder();
       renderPhotosGrid();
     });
@@ -610,19 +595,18 @@ async function deletePhoto(id) {
 }
  
 async function saveAllSettings() {
-  if (!activeInvite) { toast('Selecione um perfil!','#f55'); return; }
+  if(!activeInvite) return;
   const payload = [
-    { key:`invite:${activeInvite.code}:title`,   value:document.getElementById('f-title').value },
-    { key:`invite:${activeInvite.code}:author`,  value:document.getElementById('f-author').value },
-    { key:`invite:${activeInvite.code}:music`,   value:document.getElementById('f-music').value },
-    { key:`invite:${activeInvite.code}:date`,    value:document.getElementById('f-date').value },
-    { key:`invite:${activeInvite.code}:message`, value:document.getElementById('f-message').value },
+    { key: `invite:${activeInvite.code}:title`, value: document.getElementById('f-title').value },
+    { key: `invite:${activeInvite.code}:author`, value: document.getElementById('f-author').value },
+    { key: `invite:${activeInvite.code}:music`, value: document.getElementById('f-music').value },
+    { key: `invite:${activeInvite.code}:date`, value: document.getElementById('f-date').value },
+    { key: `invite:${activeInvite.code}:message`, value: document.getElementById('f-message').value }
   ];
-  for (const item of payload) await sb('settings',{method:'POST',prefer:'resolution=merge-duplicates,return=representation',body:item});
-  toast('✅ Dados salvos!'); await loadSettings(); applySettings();
+  for(let item of payload) { await sb('settings', { method: 'POST', prefer: 'resolution=merge', body: item }); }
+  toast("Dados salvos!"); await loadSettings();
 }
- 
-function logout() { activeInvite=null; switchScreen('invite-screen'); }
+function logout() { activeInvite = null; switchScreen('invite-screen'); }
 </script>
 </body>
 </html>
